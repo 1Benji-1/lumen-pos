@@ -1,0 +1,1 @@
+export type PlanCode = 'standard' | 'pro' | 'enterprise';

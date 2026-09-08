@@ -1,0 +1,14 @@
+@import "../../../packages/ui-config/tailwind-base.css";
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .fixed, .fixed * {
+    visibility: visible;
+  }
+  .fixed {
+    position: absolute;
+    inset: 0;
+  }
+}

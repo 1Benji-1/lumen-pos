@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+.turbo
+.DS_Store
+*.log
+.vercel
+apps/mobile/build
+apps/mobile/.dart_tool
