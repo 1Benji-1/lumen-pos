@@ -53,10 +53,10 @@
 **Interfaces:**
 - Produces: branch `codex/stabilization-baseline` with understandable commits based on `main`.
 
-- [ ] Create the branch without altering working files.
-- [ ] Commit the current product/application snapshot and its database history.
-- [ ] Commit verification infrastructure, CI workflow and stabilization records.
-- [ ] Verify `git status` contains no untracked product files and inspect both commit summaries.
+- [x] Create the branch without altering working files.
+- [x] Commit the current product/application snapshot and its database history.
+- [x] Commit verification infrastructure, CI workflow and stabilization records.
+- [x] Verify `git status` contains no untracked product files and inspect all commit summaries.
 
 ### Task 3: Fresh verification from the committed tree
 
@@ -67,10 +67,10 @@
 - Consumes: committed baseline from Task 2.
 - Produces: fresh evidence tied to the final commit SHA.
 
-- [ ] Run `pnpm install --frozen-lockfile --offline`.
-- [ ] Run `pnpm check` and require typecheck, all Vitest tests, lint ratchet and both builds to pass.
-- [ ] Run `pnpm test:db` and require all PostgreSQL assertions/concurrency probes to pass.
-- [ ] Run `git diff --check`, staged secret scan and ensure only ignored local files remain.
+- [x] Run `pnpm install --frozen-lockfile --offline`.
+- [x] Run `pnpm check` and require typecheck, all Vitest tests, lint ratchet and both builds to pass.
+- [x] Run `pnpm test:db` and require all PostgreSQL assertions/concurrency probes to pass.
+- [x] Run `git diff --check`, tracked secret scan and ensure only ignored local files remain.
 
 ### Task 4: GitHub CI and baseline handoff
 
