@@ -1,0 +1,3 @@
+# Las migraciones aplicadas son inmutables: no cambiar sus hashes solo para
+# normalizar espacios históricos que PostgreSQL ignora.
+/packages/supabase/migrations/*.sql whitespace=-trailing-space,-blank-at-eof

@@ -24,7 +24,7 @@ Se propone crear la tabla `store_settings` con relación **1 a 1** con `stores`:
 create table if not exists public.store_settings (
   id uuid primary key default gen_random_uuid(),
   store_id uuid not null unique references public.stores(id) on delete cascade,
-  
+
   -- Identidad y Datos del Negocio
   legal_name text,
   commercial_name text,
@@ -41,7 +41,7 @@ create table if not exists public.store_settings (
   currency_symbol text not null default 'Bs',
   currency_code text not null default 'BOB',
   decimal_places integer not null default 2,
-  
+
   -- Políticas de Punto de Venta y Cajas
   allow_negative_stock boolean not null default true,
   max_cash_register_hours integer not null default 16, -- alerta si una caja lleva >16h abierta

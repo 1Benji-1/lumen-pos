@@ -9,15 +9,15 @@ Este documento define la arquitectura técnica, las especificaciones funcionales
 El objetivo principal es permitir que cualquier comercio del sector retail (desde una ferretería hasta una zapatería o un minimarket) sienta que el POS fue hecho a su medida, sin romper el núcleo común del sistema ni complicar la base de datos.
 
 ### Principios Fundamentales:
-1. **Cero pérdida o alteración de datos existentes:**  
+1. **Cero pérdida o alteración de datos existentes:**
    La tienda actual (`Mi Tienda de Prueba`), sus 112 productos, variantes, movimientos de stock, ventas históricas y turnos de caja quedan **100% intactos**.
-2. **Compatibilidad hacia atrás (Backward Compatibility):**  
+2. **Compatibilidad hacia atrás (Backward Compatibility):**
    Cualquier tienda existente o que no especifique sub-rubro asume automáticamente **`comercio_general`**, funcionando exactamente igual que hoy.
-3. **Sin categorías ficticias o precargadas:**  
+3. **Sin categorías ficticias o precargadas:**
    El inventario siempre arranca limpio. Cada comercio crea y organiza únicamente sus categorías reales.
-4. **Control desde el Panel de Super Admin (`apps/admin`):**  
+4. **Control desde el Panel de Super Admin (`apps/admin`):**
    Al dar de alta una nueva tienda (o editar una existente), el Administrador puede definir el rubro principal y su **Sub-rubro de Retail**.
-5. **Flexibilidad total para el comerciante:**  
+5. **Flexibilidad total para el comerciante:**
    El sub-rubro solo activa "atajos y comodidades recomendadas". Si el dueño quiere activar funciones de otros sub-rubros (por ejemplo, vender por metros en una zapatería), podrá hacerlo libremente desde Configuración.
 
 ---
@@ -58,11 +58,11 @@ El objetivo principal es permitir que cualquier comercio del sector retail (desd
 * **Ticket:** Formato ultra compacto optimizado para consumo rápido y ahorro de papel térmico.
 
 #### 2. 👗 Tienda de Ropa, Calzado y Moda (`ropa_calzado`)
-* **Matriz de Variantes en Lote (Creación rápida):**  
+* **Matriz de Variantes en Lote (Creación rápida):**
   Al registrar un producto, el usuario selecciona Tallas (`35, 36, 37, 38...` o `XS, S, M, L, XL`) y Colores (`Negro, Blanco, Azul...`) y el sistema genera todas las combinaciones automáticamente.
 * **Selector Visual en POS:** La tarjeta del producto muestra chips de tallas disponibles con su stock correspondiente para añadir al carrito en un toque sin abrir modales pesados.
 * **Unidades de Medida Permitidas:** Unidad (`u`), Par (`par`).
-* **Pie de Ticket por Defecto:**  
+* **Pie de Ticket por Defecto:**
   *"Plazo para cambios: 15 días con este comprobante y la prenda con etiqueta original intacta. No se realizan devoluciones de dinero."*
 
 #### 3. 🔧 Ferretería, Pinturería y Materiales (`ferreteria_construccion`)
@@ -84,7 +84,7 @@ El objetivo principal es permitir que cualquier comercio del sector retail (desd
 
 #### 6. 📱 Tecnología, Celulares y Accesorios (`tecnologia_celulares`)
 * **Registro Opcional de Número de Serie / IMEI:** Al cobrar un producto marcado como electrónico, se habilita un campo opcional para capturar el serial o IMEI, guardándolo en `sale_items.notes`.
-* **Cláusula de Garantía en Ticket:** El comprobante imprime el número de serie y la cláusula:  
+* **Cláusula de Garantía en Ticket:** El comprobante imprime el número de serie y la cláusula:
   *"Garantía del equipo: 3 meses por desperfectos de fábrica presentando este comprobante original."*
 * **Unidades de Medida Permitidas:** Unidad (`u`), Kit (`kit`).
 
@@ -100,15 +100,15 @@ Se añade una columna no destructiva a la tabla `stores`:
 
 ```sql
 -- Agregar sub-rubro de retail a la tabla stores con default 'comercio_general'
-ALTER TABLE public.stores 
+ALTER TABLE public.stores
 ADD COLUMN IF NOT EXISTS industry_sub_type text NOT NULL DEFAULT 'comercio_general';
 
 -- Constraint para asegurar que solo se guarden valores válidos
-ALTER TABLE public.stores 
+ALTER TABLE public.stores
 DROP CONSTRAINT IF EXISTS stores_industry_sub_type_check;
 
-ALTER TABLE public.stores 
-ADD CONSTRAINT stores_industry_sub_type_check 
+ALTER TABLE public.stores
+ADD CONSTRAINT stores_industry_sub_type_check
 CHECK (industry_sub_type IN (
   'comercio_general',
   'minimarket_abarrotes',
@@ -144,7 +144,7 @@ En `packages/types/src/business.ts`:
   * Muestra un badge con el sub-rubro al lado del nombre de la tienda.
 
 ### 4.4 Aplicación Web del Negocio (`apps/web`)
-* **Hook Central `useRetailSubrubro()`:**  
+* **Hook Central `useRetailSubrubro()`:**
   Lee `industry_sub_type` de la tienda y expone las propiedades activas para condicionar la interfaz sin duplicar código.
 * **Ajustes en Componentes:**
   * `ManualBarcodeInput.tsx`: Comportamiento de foco automático si `autoFocusBarcode: true`.
