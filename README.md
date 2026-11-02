@@ -14,10 +14,10 @@ Antes de clonar el repo, instala esto en tu computadora (Linux/Ubuntu-based):
 
 ```bash
 # Verifica si ya tienes Node instalado
-node --version   # debería ser v18 o superior
+node --version   # requiere v22.13 o superior
 
 # Instalar pnpm si no lo tienes
-npm install -g pnpm
+npm install -g pnpm@12.4.1
 ```
 
 ### 2. Docker Engine
@@ -67,7 +67,7 @@ cd lumen-pos
 ### 2. Instala las dependencias del monorepo
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 ### 3. Levanta Supabase local
@@ -82,16 +82,16 @@ Al terminar, te mostrará URLs y claves (Publishable Key, etc.) — las vas a ne
 
 ### 4. Aplica todas las migraciones
 
-Si es la primera vez en esta máquina, la base está vacía, así que usa:
+Aplica las pendientes conservando los datos existentes:
 
 ```bash
-pnpm exec supabase db reset --workdir packages
+pnpm exec supabase migration up --local --workdir packages
 ```
 
 ### 5. Regenera los tipos de TypeScript
 
 ```bash
-pnpm exec supabase gen types typescript --local --workdir packages > packages/types/src/database.types.ts
+pnpm exec supabase gen types typescript --local --workdir packages > /tmp/lumen-database.types.ts && cp /tmp/lumen-database.types.ts packages/types/src/database.types.ts
 ```
 
 ### 6. Configura las variables de entorno
@@ -145,11 +145,11 @@ pnpm --filter admin dev
 ```
 → `http://localhost:5174` (o el puerto que asigne Vite)
 
-**Terminal 3 — solo cuando necesites crear una tienda nueva desde el panel admin:**
+**Terminal 3 — para crear tiendas y gestionar colaboradores:**
 ```bash
-pnpm exec supabase functions serve create-store --workdir packages --no-verify-jwt
+pnpm exec supabase functions serve --workdir packages --no-verify-jwt
 ```
-(Ciérrala con `Ctrl+C` cuando no la uses, para ahorrar RAM en máquinas con poca memoria.)
+Las funciones verifican la identidad y los permisos internamente. No pongas claves de servicio en variables `VITE_*`.
 
 ---
 
@@ -158,11 +158,12 @@ pnpm exec supabase functions serve create-store --workdir packages --no-verify-j
 | Acción | Comando |
 |---|---|
 | Crear una migración nueva | `pnpm exec supabase migration new nombre_de_la_migracion --workdir packages` |
-| Aplicar migraciones nuevas SIN perder datos | `pnpm exec supabase migration up --workdir packages` |
+| Aplicar migraciones nuevas SIN perder datos | `pnpm exec supabase migration up --local --workdir packages` |
 | Reiniciar la base desde cero (borra todo) | `pnpm exec supabase db reset --workdir packages` |
 | Ver estado/claves de Supabase local | `pnpm exec supabase status --workdir packages` |
-| Regenerar tipos de TypeScript | `pnpm exec supabase gen types typescript --local --workdir packages > packages/types/src/database.types.ts` |
-| Verificar que no hay errores de TypeScript | `pnpm --filter web exec tsc --noEmit` |
+| Regenerar tipos de TypeScript | Usar el archivo temporal del paso 5; sustituir el origen solo si el comando termina correctamente |
+| Verificar TypeScript de ambas aplicaciones | `pnpm typecheck` |
+| Comprobar la base de desarrollo | `pnpm check` y `pnpm test:db`; ver [alcance y límites](docs/STABILIZATION.md) |
 | Ver correos de prueba (invitaciones, reset de clave) | Abrir `http://127.0.0.1:54324` (Mailpit) |
 | Apagar Supabase local | `pnpm exec supabase stop --workdir packages` |
 
