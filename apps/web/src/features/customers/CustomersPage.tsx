@@ -1,11 +1,12 @@
 import { useStoreId } from '../../shared/hooks/useStoreId'
 import { CustomerList } from './components/CustomerList'
+import { LoadingScreen } from '../../shared/components/LoadingScreen'
 
 export function CustomersPage() {
   const { storeId, loading } = useStoreId()
 
-  if (loading) return <div className="text-white p-8">Cargando...</div>
-  if (!storeId) return <div className="text-white p-8">No se encontró tu tienda.</div>
+  if (loading) return <LoadingScreen message="Cargando cartera de clientes..." />
+  if (!storeId) return <div className="text-[#BC4749] p-8 text-sm text-center">No se encontró tu tienda asociada.</div>
 
   return <CustomerList storeId={storeId} />
 }

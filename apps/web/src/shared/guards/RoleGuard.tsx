@@ -1,34 +1,39 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../../features/auth/hooks/useAuth'
+import type { ReactNode } from 'react'
+import { type UserRole, type Permission, getDefaultRouteForRole } from '@lumen-pos/types'
+import { useCurrentUserRole } from '../hooks/useCurrentUserRole'
 
-type Role = 'owner' | 'admin' | 'cashier'
+import { LoadingScreen } from '../components/LoadingScreen'
 
-export function RoleGuard({ allowedRoles }: { allowedRoles: Role[] }) {
-  const { session } = useAuth()
-  const [role, setRole] = useState<Role | null>(null)
-  const [loading, setLoading] = useState(true)
+interface RoleGuardProps {
+  allowedRoles?: UserRole[]
+  requiredPermission?: Permission
+  children?: ReactNode
+}
 
-  useEffect(() => {
-    if (!session?.user?.id) return
+export function RoleGuard({ allowedRoles, requiredPermission, children }: RoleGuardProps) {
+  const { role, isActive, loading, hasPermission } = useCurrentUserRole()
 
-    supabase
-      .from('users')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
-      .then(({ data }) => {
-        setRole((data?.role as Role) ?? null)
-        setLoading(false)
-      })
-  }, [session])
-
-  if (loading) return <div className="text-white p-8">Cargando...</div>
-
-  if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />
+  if (loading) {
+    return <LoadingScreen fullScreen message="Verificando permisos de acceso..." />
   }
 
-  return <Outlet />
+  // Si el usuario está inactivo o no tiene rol
+  if (!role || !isActive) {
+    return <Navigate to="/login" replace />
+  }
+
+  const fallbackRoute = getDefaultRouteForRole(role)
+
+  // Validación por rol directo si se especificó
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    return <Navigate to={fallbackRoute} replace />
+  }
+
+  // Validación por permiso si se especificó
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return <Navigate to={fallbackRoute} replace />
+  }
+
+  return children ? <>{children}</> : <Outlet />
 }
