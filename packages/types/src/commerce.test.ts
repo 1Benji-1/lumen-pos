@@ -16,6 +16,10 @@ describe('legacy business profile', () => {
       expect(resolveLegacyBusinessProfile('tienda_articulos', subtype)).toEqual({ familyId: 'retail', categoryId: subtype })
     }
   })
+  it('recognizes the new retail categories when they are stored on a legacy retail business', () => {
+    expect(resolveLegacyBusinessProfile('tienda_articulos', 'repuestos')).toEqual({ familyId: 'retail', categoryId: 'repuestos' })
+    expect(resolveLegacyBusinessProfile('tienda_articulos', 'tienda_mascotas')).toEqual({ familyId: 'retail', categoryId: 'tienda_mascotas' })
+  })
   it('falls back safely for unknown values', () => {
     expect(resolveLegacyBusinessProfile('unknown', 'dark_kitchen')).toEqual({ familyId: 'retail', categoryId: 'comercio_general' })
     expect(resolveLegacyBusinessProfile('tienda_articulos', 'dark_kitchen')).toEqual({ familyId: 'retail', categoryId: 'comercio_general' })

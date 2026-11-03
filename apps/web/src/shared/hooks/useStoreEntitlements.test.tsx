@@ -44,3 +44,9 @@ it('uses general retail settings for a non-retail legacy store', () => {
   fixture.query.data.industry_sub_type = 'ropa_calzado'
   expect(renderHook(() => useRetailSubrubro()).result.current.subType).toBe('comercio_general')
 })
+it('uses general retail settings until a new category has a dedicated POS preset', () => {
+  fixture.query.data.industry_sub_type = 'repuestos'
+  const { subType, config } = renderHook(() => useRetailSubrubro()).result.current
+  expect(subType).toBe('comercio_general')
+  expect(config.code).toBe('comercio_general')
+})

@@ -24,8 +24,10 @@ it('renders a loading screen without children while entitlements load', () => {
   renderGuard()
   expect(screen.queryByText('Contenido privado')).toBeNull()
 })
-it('renders a restriction without children when entitlement loading fails', () => {
+it('shows a connection error without children when entitlement loading fails', () => {
   state.error = new Error('offline')
   renderGuard()
   expect(screen.queryByText('Contenido privado')).toBeNull()
+  expect(screen.getByText('No se pudo comprobar el acceso')).toBeTruthy()
+  expect(screen.queryByText(/función no disponible en tu plan/i)).toBeNull()
 })

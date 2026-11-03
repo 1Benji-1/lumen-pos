@@ -14,7 +14,11 @@ export function PlanGuard({
 
   if (isLoading) return <LoadingScreen message="Comprobando suscripción..." />
 
-  if (error || !isFeatureEnabled(feature)) {
+  if (error) {
+    return <PlanRestrictionView title="No se pudo comprobar el acceso" description="Vuelve a intentarlo cuando se restablezca la conexión." />
+  }
+
+  if (!isFeatureEnabled(feature)) {
     return (
       <PlanRestrictionView
         planName={planName}

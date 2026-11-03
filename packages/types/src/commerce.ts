@@ -40,15 +40,15 @@ export const BUSINESS_CATEGORIES: Record<BusinessCategoryId, BusinessCategoryDef
   servicio_tecnico: { id: 'servicio_tecnico', familyId: 'services', name: 'Servicio técnico' },
   mayorista_general: { id: 'mayorista_general', familyId: 'wholesale', name: 'Mayorista general' },
   distribuidor: { id: 'distribuidor', familyId: 'wholesale', name: 'Distribuidor' },
-} as Record<BusinessCategoryId, BusinessCategoryDefinition>
+}
 
 export function getBusinessCategory(categoryId: BusinessCategoryId): BusinessCategoryDefinition { return BUSINESS_CATEGORIES[categoryId] }
 
 export function resolveLegacyBusinessProfile(businessType: BusinessType | string | null | undefined, industrySubType?: RetailSubType | string | null): BusinessProfile {
   if (businessType === 'restaurante') return { familyId: 'gastronomy', categoryId: 'restaurante_tradicional' }
   if (businessType === 'supermercado') return { familyId: 'retail', categoryId: 'minimarket_abarrotes' }
-  if (businessType === 'tienda_articulos' && industrySubType && BUSINESS_CATEGORIES[industrySubType as BusinessCategoryId]?.familyId === 'retail' && industrySubType !== 'repuestos' && industrySubType !== 'tienda_mascotas') {
-    return { familyId: 'retail', categoryId: industrySubType as RetailSubType }
+  if (businessType === 'tienda_articulos' && industrySubType && BUSINESS_CATEGORIES[industrySubType as BusinessCategoryId]?.familyId === 'retail') {
+    return { familyId: 'retail', categoryId: industrySubType as BusinessCategoryId }
   }
   return { familyId: 'retail', categoryId: 'comercio_general' }
 }

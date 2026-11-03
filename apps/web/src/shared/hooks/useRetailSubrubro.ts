@@ -16,10 +16,12 @@ export function useRetailSubrubro(): {
   const { data: store, isLoading: storeLoading } = useStorePlan(storeId)
 
   const profile = resolveLegacyBusinessProfile(store?.business_type, store?.industry_sub_type)
-  const subType = profile.familyId === 'retail' && store?.business_type === 'tienda_articulos'
-    ? profile.categoryId as RetailSubType
-    : 'comercio_general'
-  const config = getRetailSubrubroConfig(subType)
+  const config = getRetailSubrubroConfig(
+    profile.familyId === 'retail' && store?.business_type === 'tienda_articulos'
+      ? profile.categoryId
+      : 'comercio_general',
+  )
+  const subType = config.code
 
   return {
     subType,
