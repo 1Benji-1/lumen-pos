@@ -1,5 +1,6 @@
 import { useStoreId } from './useStoreId'
 import { useStorePlan } from './useStorePlan'
+import { resolveLegacyBusinessProfile } from '@lumen-pos/types'
 import {
   getRetailSubrubroConfig,
   type RetailSubType,
@@ -14,7 +15,10 @@ export function useRetailSubrubro(): {
   const { storeId, loading: storeIdLoading } = useStoreId()
   const { data: store, isLoading: storeLoading } = useStorePlan(storeId)
 
-  const subType = (store?.industry_sub_type as RetailSubType) || 'comercio_general'
+  const profile = resolveLegacyBusinessProfile(store?.business_type, store?.industry_sub_type)
+  const subType = profile.familyId === 'retail' && store?.business_type === 'tienda_articulos'
+    ? profile.categoryId as RetailSubType
+    : 'comercio_general'
   const config = getRetailSubrubroConfig(subType)
 
   return {
