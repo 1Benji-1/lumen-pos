@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { useStoreId } from '../hooks/useStoreId'
-import { useStorePlan } from '../hooks/useStorePlan'
+import { useStoreEntitlements } from '../hooks/useStoreEntitlements'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { PlanRestrictionView } from '../components/PlanRestrictionView'
 
@@ -11,22 +10,14 @@ export function PlanGuard({
   feature: string
   children: ReactNode
 }) {
-  const { storeId } = useStoreId()
-  const { data, isLoading } = useStorePlan(storeId)
+  const { isFeatureEnabled, planName, isLoading, error } = useStoreEntitlements()
 
   if (isLoading) return <LoadingScreen message="Comprobando suscripción..." />
 
-  const planFeatures = ((data?.plans as any)?.features as Record<string, boolean> | undefined) ?? {}
-  const overrides = (data?.feature_overrides as Record<string, boolean> | null) ?? {}
-
-  // Las excepciones de la tienda mandan por encima del plan
-  const effectiveFeatures: Record<string, boolean> = { ...planFeatures, ...overrides }
-  const hasAccess = effectiveFeatures[feature] === true
-
-  if (!hasAccess) {
+  if (error || !isFeatureEnabled(feature)) {
     return (
       <PlanRestrictionView
-        planName={(data?.plans as any)?.name}
+        planName={planName}
       />
     )
   }

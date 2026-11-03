@@ -4,7 +4,7 @@ import type { PaymentMethod, PaymentSplitItem } from '@lumen-pos/types'
 import { PAYMENT_METHODS } from '@lumen-pos/types'
 import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
 import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
-import { useStorePlan } from '../../../shared/hooks/useStorePlan'
+import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
 import { usePosToast } from '../context/PosToastContext'
 
 interface CheckoutModalProps {
@@ -43,11 +43,8 @@ export function CheckoutModal({
 }: CheckoutModalProps) {
   const { config } = useRetailSubrubro()
   const { settings } = useStoreSettings(storeId)
-  const { data: storePlan } = useStorePlan(storeId)
-  const planFeatures = ((storePlan?.plans as any)?.features as Record<string, boolean> | undefined) || {}
-  const overrides = (storePlan?.feature_overrides as Record<string, boolean> | null) || {}
-  const effectiveFeatures = { ...planFeatures, ...overrides }
-  const allowSplitPayment = effectiveFeatures['split_payments'] === true
+  const { isFeatureEnabled } = useStoreEntitlements()
+  const allowSplitPayment = isFeatureEnabled('split_payments')
 
   const currency = settings?.currency_symbol || 'Bs'
 

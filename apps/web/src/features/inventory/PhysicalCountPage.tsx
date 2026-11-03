@@ -7,6 +7,7 @@ import { LoadingScreen } from '../../shared/components/LoadingScreen'
 import { StickyTableWrapper } from '../../shared/components/StickyTableWrapper'
 import { useStoreSettings } from '../settings/hooks/useStoreSettings'
 import { useStorePlan } from '../../shared/hooks/useStorePlan'
+import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
 
 interface CountItem {
   variantId: string
@@ -25,12 +26,12 @@ export function PhysicalCountPage() {
   const { data: products, isLoading, refetch } = useProducts(storeId, { includeInactive: false })
   const { settings } = useStoreSettings(storeId)
   const { data: planData } = useStorePlan(storeId)
+  const { isFeatureEnabled } = useStoreEntitlements()
   const adjustStock = useAdjustVariantStock(storeId)
 
   // El conteo a ciegas aplica si está habilitado en ajustes y el plan es Enterprise o tiene override
   const planCode = (planData?.plans as any)?.code
-  const overrides = (planData?.feature_overrides as Record<string, boolean> | null) ?? {}
-  const hasBlindCountPlan = planCode === 'enterprise' || overrides['physical_count_blind'] === true
+  const hasBlindCountPlan = planCode === 'enterprise' || isFeatureEnabled('physical_count_blind')
   const isBlindCount = hasBlindCountPlan && (settings?.blind_physical_count === true)
 
   const [counts, setCounts] = useState<Record<string, string>>({})

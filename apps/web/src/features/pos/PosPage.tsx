@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useStoreId } from '../../shared/hooks/useStoreId'
 import { useStorePlan } from '../../shared/hooks/useStorePlan'
+import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
 import { useAuth } from '../auth/hooks/useAuth'
 import { useProducts } from '../inventory/hooks/useProducts'
 import { useOpenCashRegister } from './hooks/useCashRegister'
@@ -43,16 +44,14 @@ function PosPageContent() {
   const { storeId, loading: storeLoading } = useStoreId()
   const { settings } = useStoreSettings(storeId)
   const { data: storePlan, isLoading: planLoading } = useStorePlan(storeId)
+  const { isFeatureEnabled } = useStoreEntitlements()
   const { session } = useAuth()
   const isOnline = useOnlineStatus()
 
   const offlineCount = useOfflineSalesCount(storeId)
   const isSyncing = useOfflineSyncStatus()
 
-  const planFeatures = (storePlan?.plans?.features as Record<string, boolean> | undefined) ?? {}
-  const overrides = (storePlan?.feature_overrides as Record<string, boolean> | null) ?? {}
-  const effectiveFeatures = { ...planFeatures, ...overrides }
-  const allowsMultipleRegisters = effectiveFeatures['multiple_cash_registers'] === true
+  const allowsMultipleRegisters = isFeatureEnabled('multiple_cash_registers')
 
   const { data: cashRegister, isLoading: registerLoading } = useOpenCashRegister(
     storeId,

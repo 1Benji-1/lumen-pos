@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStoreId } from '../../shared/hooks/useStoreId'
 import { useStorePlan } from '../../shared/hooks/useStorePlan'
+import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
 import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
 import { useStaff } from './hooks/useStaff'
 import { StaffTable } from './components/StaffTable'
@@ -20,6 +21,7 @@ export function StaffPage() {
     isRefetching,
   } = useStaff(storeId)
   const { data: storePlan } = useStorePlan(storeId)
+  const { getLimit } = useStoreEntitlements()
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false)
@@ -28,12 +30,9 @@ export function StaffPage() {
   const currentUserId = staff.find((s) => s.email === currentUserEmail)?.id
 
   // Límites según el plan contratado
-  const planFeatures = ((storePlan?.plans as any)?.features as Record<string, any> | undefined) || {}
-  const overrides = (storePlan?.feature_overrides as Record<string, any> | null) || {}
-  const effectiveFeatures = { ...planFeatures, ...overrides }
   const planCode = (storePlan?.plans as any)?.code
   const planName = (storePlan?.plans as any)?.name || (planCode === 'standard' ? 'Standard' : planCode === 'pro' ? 'Pro' : 'Actual')
-  const maxUsers = Number(effectiveFeatures.max_users) || (planCode === 'standard' ? 2 : planCode === 'pro' ? 6 : 999)
+  const maxUsers = getLimit('max_users') ?? (planCode === 'standard' ? 2 : planCode === 'pro' ? 6 : 999)
   const isUserLimitReached = staff.length >= maxUsers
 
   // Métricas rápidas del equipo

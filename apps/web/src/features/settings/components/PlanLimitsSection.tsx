@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useStoreId } from '../../../shared/hooks/useStoreId'
 import { useStorePlan } from '../../../shared/hooks/useStorePlan'
+import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
 import { useStaff } from '../../staff/hooks/useStaff'
 import { PLAN_DEFAULT_LIMITS, SYSTEM_FEATURES, type PlanCode } from '@lumen-pos/types'
 
 export function PlanLimitsSection() {
   const { storeId } = useStoreId()
   const { data: storePlan, isLoading: planLoading } = useStorePlan(storeId)
+  const { isFeatureEnabled, getLimit } = useStoreEntitlements()
   const { data: staff, isLoading: staffLoading } = useStaff(storeId)
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
@@ -22,17 +24,13 @@ export function PlanLimitsSection() {
 
   const limits = PLAN_DEFAULT_LIMITS[planCode] || PLAN_DEFAULT_LIMITS.standard
   const currentUsers = staff?.length ?? 1
-  const maxUsers = limits.max_users
+  const maxUsers = getLimit('max_users') ?? limits.max_users
   const userPercent = maxUsers >= 999 ? 0 : Math.min(100, Math.round((currentUsers / maxUsers) * 100))
 
-  const maxRegisters = limits.max_cash_registers
+  const maxRegisters = getLimit('max_cash_registers') ?? limits.max_cash_registers
   const currentRegisters = 1 // Caja actual
 
-  const planFeatures = (storePlan?.plans?.features as Record<string, boolean>) || {}
-  const overrides = (storePlan?.feature_overrides as Record<string, boolean>) || {}
-  const effectiveFeatures = { ...planFeatures, ...overrides }
-
-  const activeFeaturesList = SYSTEM_FEATURES.filter((f) => effectiveFeatures[f.key] === true)
+  const activeFeaturesList = SYSTEM_FEATURES.filter((f) => isFeatureEnabled(f.key))
 
   const handleOpenUpgrade = (targetPlan: PlanCode) => {
     setSelectedUpgradePlan(targetPlan)

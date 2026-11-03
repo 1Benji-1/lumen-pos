@@ -3,8 +3,8 @@ import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-do
 import { useQueryClient } from '@tanstack/react-query'
 import { ROLE_DEFINITIONS, type UserRole } from '@lumen-pos/types'
 import { useStoreId } from '../hooks/useStoreId'
-import { useStorePlan } from '../hooks/useStorePlan'
 import { useStoreModules } from '../hooks/useStoreModules'
+import { useStoreEntitlements } from '../hooks/useStoreEntitlements'
 import { useCurrentUserRole } from '../hooks/useCurrentUserRole'
 import { useAuth } from '../../features/auth/hooks/useAuth'
 import { signOut } from '../../features/auth/services/authService'
@@ -19,7 +19,7 @@ export function NavigationHeader() {
   const { storeName, planName } = useStoreModules()
   const { role, fullName, email } = useCurrentUserRole()
   const { session } = useAuth()
-  const { data: storePlan } = useStorePlan(storeId)
+  const { isFeatureEnabled } = useStoreEntitlements()
   const isOnline = useOnlineStatus()
   const navigate = useNavigate()
   const location = useLocation()
@@ -62,10 +62,7 @@ export function NavigationHeader() {
   }, [docsSearchInput, isDocs, searchParams, setSearchParams])
 
   // 1. Estado reactivo de caja registradora: considera multi-caja según plan
-  const planFeatures = ((storePlan?.plans as any)?.features as Record<string, boolean> | undefined) ?? {}
-  const overrides = (storePlan?.feature_overrides as Record<string, boolean> | null) ?? {}
-  const effectiveFeatures = { ...planFeatures, ...overrides }
-  const allowsMultipleRegisters = effectiveFeatures['multiple_cash_registers'] === true
+  const allowsMultipleRegisters = isFeatureEnabled('multiple_cash_registers')
 
   const { data: openRegister } = useOpenCashRegister(
     storeId,

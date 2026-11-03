@@ -13,7 +13,7 @@ import { EditProductModal } from './EditProductModal'
 import { QuickAdjustmentModal } from './QuickAdjustmentModal'
 import { generateInternalBarcode } from '../utils/barcodeGenerator'
 import { PRODUCT_UNITS } from '@lumen-pos/types'
-import { useStorePlan } from '../../../shared/hooks/useStorePlan'
+import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
 import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
 import { StickyTableWrapper } from '../../../shared/components/StickyTableWrapper'
 
@@ -46,11 +46,8 @@ export function ProductTable({ storeId }: { storeId: string }) {
   const [adjustingVariantId, setAdjustingVariantId] = useState<string | null>(null)
 
   const { data: categories } = useCategories(storeId)
-  const { data: storePlan } = useStorePlan(storeId)
-  const planFeatures = ((storePlan?.plans as any)?.features as Record<string, any> | undefined) || {}
-  const overrides = (storePlan?.feature_overrides as Record<string, any> | null) || {}
-  const effectiveFeatures = { ...planFeatures, ...overrides }
-  const allowBarcodeLabels = effectiveFeatures['barcode_labels'] === true
+  const { isFeatureEnabled } = useStoreEntitlements()
+  const allowBarcodeLabels = isFeatureEnabled('barcode_labels')
 
   useEffect(() => {
     const q = searchParams.get('filter')
