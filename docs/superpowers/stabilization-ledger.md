@@ -50,3 +50,15 @@ Logs de esta sesión en `/tmp/lumen-pos-stabilization`: `check-verified.log`, `d
 ### Deuda y siguiente trabajo
 
 `pnpm lint:strict` sigue fallando por 132 errores heredados y cinco advertencias; no se desactivaron reglas. La base incremental impide aceptar diagnósticos adicionales por archivo/regla/severidad. Quedan avisos de bundles grandes y los límites offline, datos históricos y hardware descritos en [STABILIZATION.md](../STABILIZATION.md). No hay PWA completa ni garantía de impresión física. La próxima modificación debe tener alcance concreto y sus pruebas, conservando estos controles.
+
+## Cierre versionado del baseline
+
+Se creó `codex/stabilization-baseline` desde `main` y se separó el snapshot en commits de producto/esquema, pruebas/CI y documentación/higiene. Las copias locales de herramientas, salidas de Impeccable, builds, dependencias, `.env.local`, `.superpowers` y estado temporal de Supabase permanecen en disco e ignoradas. `packages/supabase/.temp/cli-latest` dejó de estar versionado. El escaneo de todos los archivos candidatos y luego de todos los archivos tracked no encontró claves de servicio, llaves privadas ni tokens GitHub/OpenAI con los patrones definidos.
+
+La verificación registrada del árbol committeado ejecutó instalación offline congelada, `pnpm check`, `pnpm test:db`, `git diff --check`, escaneo de secretos y limpieza de estado. La política `.gitattributes` omite únicamente whitespace en migraciones SQL ya aplicadas para no alterar sus hashes; los SHA256 de `20261102010000` y `20261102020000` permanecen intactos. La deuda de lint continúa visible y limitada.
+
+El smoke en navegador real abrió `http://127.0.0.1:5173/pos` y `http://localhost:5174/stores`: ambos redirigieron a sus logins, las dos pantallas renderizaron y los logs de consola no registraron errores. Este alcance comprueba arranque y guards, no sustituye un recorrido autenticado completo.
+
+El ejercicio de backup/restore generó un dump privado de Supabase local sin Vault, restauró una base temporal y comparó `30:7:8:113` para migraciones, tiendas, ventas y variantes. La base temporal fue eliminada. Vault requiere un procedimiento separado; el archivo de `/tmp` no se versiona ni constituye una política de producción.
+
+GitHub remoto sigue con `main` en `dbb2cd7`. Al comprobar el cierre, `gh auth status` informó que el token guardado de `1Benji-1` es inválido. Push, pull request y ejecución remota de CI quedan a la espera de reautenticación; no se afirma resultado de GitHub Actions hasta observar ambos jobs. La etiqueta `stabilization-baseline-2026-11-02` solo se creará sobre `main` después de integrar el PR.

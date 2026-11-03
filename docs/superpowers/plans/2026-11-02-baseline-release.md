@@ -96,10 +96,10 @@
 **Interfaces:**
 - Produces: an exact boundary between verified development baseline and unverified production operations.
 
-- [ ] Record browser/manual, backup/restore, monitoring, performance, printer/scanner and deployment gates.
-- [ ] Execute local backup/restore and browser smoke checks when the local stack supports them without changing preserved data.
-- [ ] Record hardware validation as pending until the printer/scanner is physically connected.
-- [ ] Record production deployment/monitoring as pending until a staging or production target and credentials are supplied.
+- [x] Record browser/manual, backup/restore, monitoring, performance, printer/scanner and deployment gates.
+- [x] Execute local backup/restore and browser smoke checks when the local stack supports them without changing preserved data.
+- [x] Record hardware validation as pending until the printer/scanner is physically connected.
+- [x] Record production deployment/monitoring as pending until a staging or production target and credentials are supplied.
 
 ## Self-review
 

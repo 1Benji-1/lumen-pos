@@ -47,3 +47,21 @@ Las ventas usan clave de idempotencia por tienda y conservan costo histórico, v
 La cola offline protege operaciones durante interrupciones, pero no se añadió un service worker/PWA para arrancar en frío sin conexión. Si no se puede consultar el almacenamiento que contiene los rechazos, la sincronización se detiene para evitar reenviar una compra descartada. Si ambos almacenes impiden escribir y borrar, el bloqueo solo puede mantenerse en la ventana abierta. Sin IndexedDB ni navigator.locks, localStorage no ofrece escritura atómica entre pestañas. Las ventas legacy con cajas provisionales requieren intervención.
 
 La impresión sigue usando el navegador. Las pruebas no reemplazan probar una impresora, un lector físico y recorridos manuales en el hardware del comercio. Auth y SQL no comparten transacción: si falla la compensación de un alta, se devuelve error y requiere revisión administrativa. Los FK compuestos validan escrituras nuevas; las filas históricas incompatibles no se eliminan ni reparan silenciosamente. Persisten avisos de tamaño de bundles. El despliegue de los cambios de base de datos y Edge Functions debe realizarse junto al frontend actualizado; no se realizó despliegue de producción.
+
+## Gates para producción
+
+El baseline de desarrollo se cerró en la rama `codex/stabilization-baseline`. Estos gates distinguen evidencia reproducible de operaciones que necesitan infraestructura real:
+
+| Gate | Estado del baseline | Condición para cerrarlo |
+| --- | --- | --- |
+| Navegador | Smoke local correcto: web y admin renderizan login, las rutas protegidas redirigen y no hay errores de consola | Añadir recorridos E2E autenticados para los flujos que se modifiquen |
+| Backup/restore | Restauración local correcta en una base temporal; coincidieron migraciones, tiendas, ventas y variantes | Automatizar respaldo periódico y probar restauración en staging con la política de retención elegida |
+| Vault | Excluido deliberadamente del dump de aplicación | Respaldar/recuperar secretos mediante el procedimiento separado del proveedor; nunca copiarlos al repositorio |
+| Rendimiento | Builds correctos; Vite advierte bundles de 654 kB (admin) y 1.20 MB (web) antes de gzip | Medir en staging con datos y red representativos; fijar presupuestos antes de optimizar |
+| Monitoreo | No existe destino productivo configurado | Elegir servicio, política de datos y alertas; validar captura de error sin exponer PII o credenciales |
+| Impresora/lector/gaveta | Pendiente | Conectar modelos reales y comprobar ticket, corte, escaneo, reconexión y fallback del navegador |
+| Despliegue | No realizado | Proveer staging/producción y credenciales; aplicar SQL, Edge y frontend juntos y ejecutar smoke posterior |
+
+### Ejercicio local de recuperación
+
+El 2026-11-02 se generó un dump PostgreSQL custom privado fuera del repositorio. Se excluyeron el esquema y la extensión `vault`; el primer intento demostró que Vault bloquea la copia directa de `vault.secrets`, como corresponde. El segundo restore creó una base temporal, restauró el resto del clúster, comparó la firma `30 migraciones : 7 tiendas : 8 ventas : 113 variantes` con el origen y eliminó esa base temporal. El archivo local `/tmp/lumen-pos-baseline-20261102.dump` tiene permisos `600`; es evidencia desechable, no un sistema de backups de producción.
