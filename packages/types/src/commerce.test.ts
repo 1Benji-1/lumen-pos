@@ -1,0 +1,28 @@
+import { describe, expect, it } from 'vitest'
+import { BUSINESS_CATEGORIES, resolveLegacyBusinessProfile } from './commerce'
+import { RETAIL_SUBTYPES } from './business'
+
+describe('legacy business profile', () => {
+  it('maps a supermarket to the retail minimarket category', () => {
+    expect(resolveLegacyBusinessProfile('supermercado', 'comercio_general')).toEqual({
+      familyId: 'retail', categoryId: 'minimarket_abarrotes',
+    })
+  })
+  it('maps a restaurant to the traditional restaurant category', () => {
+    expect(resolveLegacyBusinessProfile('restaurante', 'comercio_general')).toEqual({ familyId: 'gastronomy', categoryId: 'restaurante_tradicional' })
+  })
+  it('preserves every retail subtype', () => {
+    for (const subtype of Object.keys(RETAIL_SUBTYPES)) {
+      expect(resolveLegacyBusinessProfile('tienda_articulos', subtype)).toEqual({ familyId: 'retail', categoryId: subtype })
+    }
+  })
+  it('falls back safely for unknown values', () => {
+    expect(resolveLegacyBusinessProfile('unknown', 'dark_kitchen')).toEqual({ familyId: 'retail', categoryId: 'comercio_general' })
+    expect(resolveLegacyBusinessProfile('tienda_articulos', 'dark_kitchen')).toEqual({ familyId: 'retail', categoryId: 'comercio_general' })
+  })
+  it('keeps every category attached to one family', () => {
+    for (const category of Object.values(BUSINESS_CATEGORIES)) {
+      expect(category.familyId).toMatch(/^(retail|gastronomy|services|wholesale)$/)
+    }
+  })
+})

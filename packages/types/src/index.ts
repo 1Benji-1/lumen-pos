@@ -1,6 +1,7 @@
 export * from './database.types'
 export * from './plans'
 export * from './business'
+export * from './commerce'
 export * from './pos'
 export * from './analytics'
 export * from './staff'
