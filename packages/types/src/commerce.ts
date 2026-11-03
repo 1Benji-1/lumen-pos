@@ -1,4 +1,4 @@
-import { RETAIL_SUBTYPES, type BusinessType, type RetailSubType } from './business'
+import type { BusinessType, RetailSubType } from './business'
 
 export type BusinessFamilyId = 'retail' | 'gastronomy' | 'services' | 'wholesale'
 export type BusinessCategoryId =
@@ -18,9 +18,14 @@ export const BUSINESS_FAMILIES: Record<BusinessFamilyId, BusinessFamilyDefinitio
   wholesale: { id: 'wholesale', name: 'Mayoristas y distribuidores' },
 }
 
-const retailCategories = Object.values(RETAIL_SUBTYPES).map(({ code, name }) => [code, { id: code, familyId: 'retail', name }] as const)
 export const BUSINESS_CATEGORIES: Record<BusinessCategoryId, BusinessCategoryDefinition> = {
-  ...Object.fromEntries(retailCategories),
+  comercio_general: { id: 'comercio_general', familyId: 'retail', name: 'Comercio general' },
+  minimarket_abarrotes: { id: 'minimarket_abarrotes', familyId: 'retail', name: 'Minimarket y abarrotes' },
+  ropa_calzado: { id: 'ropa_calzado', familyId: 'retail', name: 'Ropa y calzado' },
+  ferreteria_construccion: { id: 'ferreteria_construccion', familyId: 'retail', name: 'Ferretería y construcción' },
+  farmacia_belleza: { id: 'farmacia_belleza', familyId: 'retail', name: 'Farmacia y belleza' },
+  libreria_papeleria: { id: 'libreria_papeleria', familyId: 'retail', name: 'Librería y papelería' },
+  tecnologia_celulares: { id: 'tecnologia_celulares', familyId: 'retail', name: 'Tecnología y celulares' },
   repuestos: { id: 'repuestos', familyId: 'retail', name: 'Repuestos' },
   tienda_mascotas: { id: 'tienda_mascotas', familyId: 'retail', name: 'Tienda de mascotas' },
   restaurante_tradicional: { id: 'restaurante_tradicional', familyId: 'gastronomy', name: 'Restaurante tradicional' },
@@ -42,7 +47,7 @@ export function getBusinessCategory(categoryId: BusinessCategoryId): BusinessCat
 export function resolveLegacyBusinessProfile(businessType: BusinessType | string | null | undefined, industrySubType?: RetailSubType | string | null): BusinessProfile {
   if (businessType === 'restaurante') return { familyId: 'gastronomy', categoryId: 'restaurante_tradicional' }
   if (businessType === 'supermercado') return { familyId: 'retail', categoryId: 'minimarket_abarrotes' }
-  if (businessType === 'tienda_articulos' && industrySubType && Object.prototype.hasOwnProperty.call(RETAIL_SUBTYPES, industrySubType)) {
+  if (businessType === 'tienda_articulos' && industrySubType && BUSINESS_CATEGORIES[industrySubType as BusinessCategoryId]?.familyId === 'retail' && industrySubType !== 'repuestos' && industrySubType !== 'tienda_mascotas') {
     return { familyId: 'retail', categoryId: industrySubType as RetailSubType }
   }
   return { familyId: 'retail', categoryId: 'comercio_general' }

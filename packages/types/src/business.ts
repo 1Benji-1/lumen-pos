@@ -1,3 +1,6 @@
+import { resolveLegacyBusinessProfile } from './commerce'
+import { MODULE_REGISTRY, getDefaultModuleIds, type ModuleDefinition, type ModuleId } from './modules'
+
 export type BusinessType = 'tienda_articulos' | 'restaurante' | 'supermercado'
 
 export interface BusinessTypeConfig {
@@ -173,142 +176,31 @@ export function getRetailSubrubroConfig(subType?: string | null): RetailSubrubro
 }
 
 
-export type ModuleId =
-  | 'dashboard'
-  | 'inventory'
-  | 'pos'
-  | 'customers'
-  | 'analytics'
-  | 'staff'
-  | 'tables'
-  | 'kitchen'
-  | 'recipes'
-  | 'scales'
-  | 'settings'
-
-export interface ModuleDefinition {
-  id: ModuleId
-  name: string
-  path: string
-  description?: string
-  requiredFeature?: string
-}
-
-export const ALL_MODULES: Record<ModuleId, ModuleDefinition> = {
-  dashboard: {
-    id: 'dashboard',
-    name: 'Inicio',
-    path: '/',
-    description: 'Resumen operativo y métricas principales.',
-  },
-  pos: {
-    id: 'pos',
-    name: 'Punto de venta',
-    path: '/pos',
-    description: 'Ventas en mostrador, emisión de tickets y cobros.',
-  },
-  inventory: {
-    id: 'inventory',
-    name: 'Inventario',
-    path: '/inventario',
-    description: 'Gestión de categorías, productos y existencias.',
-  },
-  customers: {
-    id: 'customers',
-    name: 'Clientes',
-    path: '/customers',
-    description: 'Directorio de clientes y registro de compras.',
-  },
-  analytics: {
-    id: 'analytics',
-    name: 'Reportes',
-    path: '/analytics',
-    description: 'Ventas por período, productos más vendidos y margen de ganancia real.',
-    requiredFeature: 'advanced_analytics',
-  },
-  staff: {
-    id: 'staff',
-    name: 'Personal',
-    path: '/staff',
-    description: 'Gestión de equipo de trabajo, roles y catálogo de permisos.',
-  },
-  tables: {
-    id: 'tables',
-    name: 'Mesas y comandas',
-    path: '/tables',
-    description: 'Control de mesas activas y órdenes de salón.',
-  },
-  kitchen: {
-    id: 'kitchen',
-    name: 'Cocina (KDS)',
-    path: '/kitchen',
-    description: 'Pantalla de preparación y despacho de pedidos.',
-  },
-  recipes: {
-    id: 'recipes',
-    name: 'Recetas e insumos',
-    path: '/recipes',
-    description: 'Control de insumos y descuento fraccionado por preparación.',
-  },
-  scales: {
-    id: 'scales',
-    name: 'Balanzas',
-    path: '/scales',
-    description: 'Integración con balanzas electrónicas de mostrador.',
-  },
-  settings: {
-    id: 'settings',
-    name: 'Ajustes',
-    path: '/configuracion',
-    description: 'Configuración de la tienda, tickets, moneda, zona horaria y políticas.',
-  },
-}
+export type { ModuleDefinition, ModuleId } from './modules'
+export { MODULE_REGISTRY as ALL_MODULES } from './modules'
 
 export const BUSINESS_MODULES: Record<BusinessType, ModuleId[]> = {
-  tienda_articulos: ['dashboard', 'pos', 'inventory', 'customers', 'analytics', 'staff', 'settings'],
-  restaurante: ['dashboard', 'pos', 'tables', 'kitchen', 'inventory', 'recipes', 'customers', 'analytics', 'staff', 'settings'],
+  tienda_articulos: [...getDefaultModuleIds('comercio_general')],
+  restaurante: [...getDefaultModuleIds('restaurante_tradicional')],
   supermercado: ['dashboard', 'pos', 'inventory', 'customers', 'scales', 'analytics', 'staff', 'settings'],
 }
 
-/**
- * Retorna la lista de módulos habilitados para un rubro específico.
- */
 export function getModulesForBusinessType(businessType: BusinessType): ModuleDefinition[] {
-  const moduleIds = BUSINESS_MODULES[businessType] ?? BUSINESS_MODULES.tienda_articulos
-  return moduleIds.map((id) => ALL_MODULES[id])
+  const ids = BUSINESS_MODULES[businessType] ?? BUSINESS_MODULES.tienda_articulos
+  return ids.map(id => MODULE_REGISTRY[id])
 }
-
-/**
- * Valida si un módulo específico está permitido para un rubro dado.
- */
-export function isModuleAllowedForBusinessType(
-  businessType: BusinessType,
-  moduleId: ModuleId
-): boolean {
-  const moduleIds = BUSINESS_MODULES[businessType] ?? BUSINESS_MODULES.tienda_articulos
-  return moduleIds.includes(moduleId)
+export function isModuleAllowedForBusinessType(businessType: BusinessType, moduleId: ModuleId): boolean {
+  const profile = resolveLegacyBusinessProfile(businessType)
+  const ids = businessType === 'supermercado' ? BUSINESS_MODULES.supermercado : getDefaultModuleIds(profile.categoryId)
+  return ids.includes(moduleId)
 }
-
-/**
- * Verifica si un módulo está accesible evaluando rubro y funciones del plan.
- */
-export function isModuleAccessible({
-  businessType,
-  moduleId,
-  effectiveFeatures,
-}: {
+export interface LegacyModuleAccessInput {
   businessType: BusinessType
   moduleId: ModuleId
   effectiveFeatures?: Record<string, boolean>
-}): boolean {
-  if (!isModuleAllowedForBusinessType(businessType, moduleId)) {
-    return false
-  }
-
-  const moduleDef = ALL_MODULES[moduleId]
-  if (moduleDef?.requiredFeature && effectiveFeatures) {
-    return effectiveFeatures[moduleDef.requiredFeature] === true
-  }
-
-  return true
+}
+export function isModuleAccessible({ businessType, moduleId, effectiveFeatures }: LegacyModuleAccessInput): boolean {
+  if (!isModuleAllowedForBusinessType(businessType, moduleId)) return false
+  const requiredFeature = MODULE_REGISTRY[moduleId]?.requiredFeature
+  return !requiredFeature || !effectiveFeatures || effectiveFeatures[requiredFeature] === true
 }
