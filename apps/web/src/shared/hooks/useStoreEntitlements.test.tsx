@@ -3,7 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest'
 
 const fixture = vi.hoisted(() => ({
   id: { storeId: 'store-1', loading: false },
-  query: { data: { business_type: 'tienda_articulos', industry_sub_type: 'ropa_calzado', name: 'Tienda', plans: { name: 'Pro', features: { advanced_analytics: true, max_users: 2 } }, feature_overrides: { max_users: 6 } }, isLoading: false, error: null } as any,
+  query: { data: { business_type: 'tienda_articulos', industry_sub_type: 'ropa_calzado', name: 'Tienda', plans: { name: 'Pro', features: { advanced_analytics: true, max_users: 2 } }, feature_overrides: { max_users: 6 } }, isLoading: false, error: null } as { data: Record<string, unknown>; isLoading: boolean; error: Error | null },
 }))
 vi.mock('./useStoreId', () => ({ useStoreId: () => fixture.id }))
 vi.mock('./useStorePlan', () => ({ useStorePlan: () => fixture.query }))

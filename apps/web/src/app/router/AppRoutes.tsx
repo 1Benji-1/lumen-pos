@@ -35,9 +35,11 @@ export function AppRoutes() {
           <Route
             path="/"
             element={
-              <RoleGuard requiredPermission="dashboard:view">
-                <DashboardPage />
-              </RoleGuard>
+              <ModuleGuard module="dashboard">
+                <RoleGuard requiredPermission="dashboard:view">
+                  <DashboardPage />
+                </RoleGuard>
+              </ModuleGuard>
             }
           />
           <Route

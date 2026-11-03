@@ -26,10 +26,6 @@ export function useStoreModules() {
     return getModuleAccess(moduleId).allowed
   }
 
-  function isModuleAllowedInBusinessType(moduleId: ModuleId): boolean {
-    return getModuleAccess(moduleId).reason !== 'category_disabled'
-  }
-
   // Priorizar el nombre comercial configurado por el usuario en Ajustes sobre el nombre técnico inicial
   const effectiveStoreName = settings?.commercial_name?.trim() || store?.name || ''
 
@@ -42,7 +38,6 @@ export function useStoreModules() {
     availableModules,
     getModuleAccess,
     canAccessModule,
-    isModuleAllowedInBusinessType,
     isLoading: storeIdLoading || storeLoading || entitlementsLoading,
     error,
   }

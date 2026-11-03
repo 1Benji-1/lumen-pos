@@ -182,10 +182,10 @@ const SIDEBAR_BLOCKS: SidebarItemDef[][] = [
 
 export function AppSidebar() {
   const { hasPermission, loading: roleLoading } = useCurrentUserRole()
-  const { canAccessModule, isLoading: modulesLoading } = useStoreModules()
+  const { canAccessModule, isLoading: modulesLoading, error } = useStoreModules()
 
   const isItemVisible = (item: SidebarItemDef) => {
-    if (roleLoading || modulesLoading) return true
+    if (roleLoading || modulesLoading || error) return false
     if (item.moduleId && !canAccessModule(item.moduleId)) return false
     if (item.permission && !hasPermission(item.permission)) return false
     return true
@@ -196,7 +196,7 @@ export function AppSidebar() {
     block.filter(isItemVisible)
   ).filter((block) => block.length > 0)
 
-  const canAccessSettings = roleLoading || modulesLoading || hasPermission('settings:manage')
+  const canAccessSettings = !roleLoading && !modulesLoading && !error && canAccessModule('settings') && hasPermission('settings:manage')
 
   return (
     <div className="w-[50px] shrink-0 relative z-30">
