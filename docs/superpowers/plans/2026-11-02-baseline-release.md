@@ -82,10 +82,10 @@
 - Consumes: final verified commit SHA and authenticated GitHub CLI.
 - Produces: remote CI evidence and a merge-ready review surface.
 
-- [ ] Authenticate GitHub CLI if the existing token is invalid; this is the only required user-operated credential step.
-- [ ] Push `codex/stabilization-baseline` and open a pull request against `main` with validation evidence and explicit limits.
-- [ ] Wait for GitHub Actions frontend/database jobs and require both to pass; fix only reproducible repository failures.
-- [ ] Preserve the branch/PR for review. Create the baseline tag only on the integrated `main` commit, never before merge.
+- [x] Authenticate GitHub CLI if the existing token is invalid; this was the only required user-operated credential step.
+- [x] Push `codex/stabilization-baseline` and open a pull request against `main` with validation evidence and explicit limits.
+- [x] Wait for GitHub Actions frontend/database jobs and require both to pass; no repository failures required fixes.
+- [x] Preserve the branch/PR for review. The baseline tag remains reserved for the integrated `main` commit.
 
 ### Task 5: Production-readiness gates
 
