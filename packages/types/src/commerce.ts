@@ -44,6 +44,12 @@ export const BUSINESS_CATEGORIES: Record<BusinessCategoryId, BusinessCategoryDef
 
 export function getBusinessCategory(categoryId: BusinessCategoryId): BusinessCategoryDefinition { return BUSINESS_CATEGORIES[categoryId] }
 
+export function resolveStoredBusinessProfile(categoryId: string | null | undefined): BusinessProfile | null {
+  if (!categoryId || !Object.hasOwn(BUSINESS_CATEGORIES, categoryId)) return null
+  const category = BUSINESS_CATEGORIES[categoryId as BusinessCategoryId]
+  return { familyId: category.familyId, categoryId: category.id }
+}
+
 export function resolveLegacyBusinessProfile(businessType: BusinessType | string | null | undefined, industrySubType?: RetailSubType | string | null): BusinessProfile {
   if (businessType === 'restaurante') return { familyId: 'gastronomy', categoryId: 'restaurante_tradicional' }
   if (businessType === 'supermercado') return { familyId: 'retail', categoryId: 'minimarket_abarrotes' }

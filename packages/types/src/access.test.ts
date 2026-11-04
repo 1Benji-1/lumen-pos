@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveModuleAccess } from './access'
+import { resolveModuleAccess, resolveStoredModuleActivation } from './access'
 import { resolveEntitlements } from './entitlements'
 
 const retail = { familyId: 'retail', categoryId: 'comercio_general' } as const
@@ -24,5 +24,22 @@ describe('module access precedence', () => {
     for (const moduleId of ['dashboard', 'pos', 'inventory', 'customers', 'staff', 'settings'] as const) {
       expect(resolveModuleAccess({ profile: retail, moduleId, entitlements: resolveEntitlements() }).allowed).toBe(true)
     }
+  })
+})
+
+describe('persisted activation scope', () => {
+  it('uses organization exceptions and only the selected branch exceptions', () => {
+    expect(resolveStoredModuleActivation([
+      { moduleId: 'dashboard', branchId: null, enabled: false },
+      { moduleId: 'pos', branchId: 'branch-a', enabled: false },
+      { moduleId: 'inventory', branchId: 'branch-b', enabled: false },
+    ], 'branch-a')).toEqual({ dashboard: false, pos: false })
+  })
+  it('ignores unknown modules and records with the wrong scope', () => {
+    expect(resolveStoredModuleActivation([
+      { moduleId: 'unknown', branchId: null, enabled: true },
+      { moduleId: 'pos', branchId: null, enabled: false },
+      { moduleId: 'customers', branchId: 'branch-a', enabled: false },
+    ], 'branch-a')).toEqual({})
   })
 })

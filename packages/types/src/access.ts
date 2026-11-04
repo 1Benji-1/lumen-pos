@@ -3,7 +3,8 @@ import { getDefaultModuleIds, MODULE_REGISTRY, type ModuleDefinition, type Modul
 import type { EffectiveEntitlements } from './entitlements'
 
 export type ModuleActivation = Partial<Record<ModuleId, boolean>>
-export type ModuleAccessReason = 'allowed' | 'not_available_yet' | 'plan_disabled' | 'category_disabled' | 'organization_disabled' | 'permission_denied'
+export interface StoredModuleActivation { moduleId: string; branchId: string | null; enabled: boolean }
+export type ModuleAccessReason = 'allowed' | 'not_available_yet' | 'plan_disabled' | 'category_disabled' | 'organization_disabled' | 'permission_denied' | 'access_unavailable'
 export interface ModuleAccessResult { allowed: boolean; reason: ModuleAccessReason; module: ModuleDefinition }
 export interface ModuleAccessInput {
   profile: BusinessProfile
@@ -11,6 +12,19 @@ export interface ModuleAccessInput {
   entitlements: EffectiveEntitlements
   activation?: ModuleActivation
   permissionGranted?: boolean
+}
+
+export function resolveStoredModuleActivation(rows: readonly StoredModuleActivation[], branchId: string): ModuleActivation {
+  const activation: ModuleActivation = {}
+  for (const row of rows) {
+    if (!Object.hasOwn(MODULE_REGISTRY, row.moduleId)) continue
+    const moduleId = row.moduleId as ModuleId
+    const scope = MODULE_REGISTRY[moduleId].scope
+    if ((scope === 'organization' && row.branchId === null) || (scope === 'branch' && row.branchId === branchId)) {
+      activation[moduleId] = row.enabled
+    }
+  }
+  return activation
 }
 
 export function resolveModuleAccess({ profile, moduleId, entitlements, activation, permissionGranted = true }: ModuleAccessInput): ModuleAccessResult {

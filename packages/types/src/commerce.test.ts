@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BUSINESS_CATEGORIES, resolveLegacyBusinessProfile } from './commerce'
+import { BUSINESS_CATEGORIES, resolveLegacyBusinessProfile, resolveStoredBusinessProfile } from './commerce'
 import { RETAIL_SUBTYPES } from './business'
 
 describe('legacy business profile', () => {
@@ -28,5 +28,15 @@ describe('legacy business profile', () => {
     for (const category of Object.values(BUSINESS_CATEGORIES)) {
       expect(category.familyId).toMatch(/^(retail|gastronomy|services|wholesale)$/)
     }
+  })
+})
+
+describe('stored branch profile', () => {
+  it('derives the family from a valid persisted category', () => {
+    expect(resolveStoredBusinessProfile('dark_kitchen')).toEqual({ familyId: 'gastronomy', categoryId: 'dark_kitchen' })
+  })
+  it('rejects unknown or missing categories instead of granting retail defaults', () => {
+    expect(resolveStoredBusinessProfile('not-a-category')).toBeNull()
+    expect(resolveStoredBusinessProfile(null)).toBeNull()
   })
 })

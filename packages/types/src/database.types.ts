@@ -93,6 +93,44 @@ export type Database = {
           },
         ]
       }
+      branches: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          name: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          name: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          name?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_movements: {
         Row: {
           amount: number
@@ -268,6 +306,126 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      module_activation_audit: {
+        Row: {
+          activation_id: string
+          actor_id: string | null
+          branch_id: string | null
+          changed_at: string
+          id: number
+          module_id: string
+          new_enabled: boolean | null
+          old_enabled: boolean | null
+          operation: string
+          store_id: string
+        }
+        Insert: {
+          activation_id: string
+          actor_id?: string | null
+          branch_id?: string | null
+          changed_at?: string
+          id?: never
+          module_id: string
+          new_enabled?: boolean | null
+          old_enabled?: boolean | null
+          operation: string
+          store_id: string
+        }
+        Update: {
+          activation_id?: string
+          actor_id?: string | null
+          branch_id?: string | null
+          changed_at?: string
+          id?: never
+          module_id?: string
+          new_enabled?: boolean | null
+          old_enabled?: boolean | null
+          operation?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_activation_audit_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_activations: {
+        Row: {
+          branch_id: string | null
+          enabled: boolean
+          id: string
+          module_id: string
+          store_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          enabled: boolean
+          id?: string
+          module_id: string
+          store_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          enabled?: boolean
+          id?: string
+          module_id?: string
+          store_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_activations_branch_id_store_id_fkey"
+            columns: ["branch_id", "store_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id", "store_id"]
+          },
+          {
+            foreignKeyName: "module_activations_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "module_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_activations_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_catalog: {
+        Row: {
+          id: string
+          implementation_status: string
+          required_feature: string | null
+          scope: string
+        }
+        Insert: {
+          id: string
+          implementation_status: string
+          required_feature?: string | null
+          scope: string
+        }
+        Update: {
+          id?: string
+          implementation_status?: string
+          required_feature?: string | null
+          scope?: string
+        }
+        Relationships: []
       }
       plans: {
         Row: {
