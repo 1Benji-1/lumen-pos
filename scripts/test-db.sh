@@ -37,6 +37,8 @@ sql < "$root/packages/supabase/tests/regressions.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/purchase-order-items-guard.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/relationship-metadata.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/primary-branches.sql" || test_status=$?
+sql < "$root/packages/supabase/tests/module-activations.sql" || test_status=$?
+node --experimental-strip-types "$root/scripts/module-catalog-expected.mjs" | sql || test_status=$?
 bash "$root/packages/supabase/tests/concurrency.sh" "$container" || test_status=$?
 if [[ "$test_status" != 0 ]]; then exit "$test_status"; fi
 printf 'PostgreSQL behavioral tests passed (controlled Auth identities).\n'
