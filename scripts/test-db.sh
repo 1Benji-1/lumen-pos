@@ -29,8 +29,23 @@ migration_stream() {
 migration_stream | sql >/dev/null
 sql <<'SQL'
 grant usage on schema public to anon, authenticated, service_role;
-grant select, insert, update, delete on all tables in schema public to anon, authenticated, service_role;
-grant usage, select on all sequences in schema public to anon, authenticated, service_role;
+do $$
+declare relation_name text;
+begin
+  for relation_name in
+    select tablename from pg_tables
+    where schemaname='public'
+      and tablename not in ('branches','module_catalog','module_activations','module_activation_audit')
+  loop
+    execute format('grant select, insert, update, delete on public.%I to anon, authenticated, service_role', relation_name);
+  end loop;
+  for relation_name in
+    select sequencename from pg_sequences
+    where schemaname='public' and sequencename<>'module_activation_audit_id_seq'
+  loop
+    execute format('grant usage, select on sequence public.%I to anon, authenticated, service_role', relation_name);
+  end loop;
+end $$;
 SQL
 test_status=0
 sql < "$root/packages/supabase/tests/regressions.sql" || test_status=$?

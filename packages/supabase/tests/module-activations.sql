@@ -54,12 +54,10 @@ select test.ok('owner reads only own activation exceptions',
 select test.rejects('owner cannot insert an activation directly',
   $$insert into public.module_activations(store_id,module_id,enabled)
     values ('20000000-0000-0000-0000-000000000001','staff',false)$$);
-with changed as (
-  update public.module_activations set enabled=true where store_id='20000000-0000-0000-0000-000000000001' and module_id='dashboard' returning id
-) select test.ok('owner cannot update activations directly',not exists(select 1 from changed));
-with removed as (
-  delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000001' and module_id='dashboard' returning id
-) select test.ok('owner cannot delete activations directly',not exists(select 1 from removed));
+select test.rejects('owner cannot update activations directly',
+  $$update public.module_activations set enabled=true where store_id='20000000-0000-0000-0000-000000000001' and module_id='dashboard'$$);
+select test.rejects('owner cannot delete activations directly',
+  $$delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000001' and module_id='dashboard'$$);
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000004',false);
 select test.ok('inactive profile cannot read activation exceptions',(select count(*)=0 from public.module_activations));
 reset role;
@@ -77,5 +75,20 @@ select test.ok('activation audit keeps insert update and delete history',
   and exists(select 1 from public.module_activation_audit
    where store_id='20000000-0000-0000-0000-000000000001' and module_id='dashboard'
      and operation='DELETE' and old_enabled=true and new_enabled is null));
+
+select test.ok('service role cannot rewrite or erase activation audit',
+  not has_table_privilege('service_role','public.module_activation_audit','INSERT')
+  and not has_table_privilege('service_role','public.module_activation_audit','UPDATE')
+  and not has_table_privilege('service_role','public.module_activation_audit','DELETE')
+  and not has_table_privilege('service_role','public.module_activation_audit','TRUNCATE'));
+
+insert into public.stores(id,name,owner_id)
+values ('20000000-0000-0000-0000-000000000009','Tienda temporal','10000000-0000-0000-0000-000000000001');
+insert into public.module_activations(store_id,module_id,enabled)
+values ('20000000-0000-0000-0000-000000000009','dashboard',false);
+delete from public.stores where id='20000000-0000-0000-0000-000000000009';
+select test.ok('deleting a store cascades its activations and audit',
+  not exists(select 1 from public.module_activations where store_id='20000000-0000-0000-0000-000000000009')
+  and not exists(select 1 from public.module_activation_audit where store_id='20000000-0000-0000-0000-000000000009'));
 
 do $$begin if exists(select 1 from test.results where not passed) then raise exception 'module activation regression'; end if; end $$;

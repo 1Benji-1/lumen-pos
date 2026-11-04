@@ -15,7 +15,7 @@ const fixture = vi.hoisted(() => ({
     error: null as Error | null,
   },
   activations: {
-    data: [] as Array<{ module_id: string; branch_id: string | null; enabled: boolean }>,
+    data: [] as Array<{ module_id: string; branch_id: string | null; enabled: boolean }> | undefined,
     isLoading: false,
     error: null as Error | null,
   },
@@ -90,4 +90,13 @@ it('blocks all modules while activation data is loading or fails', () => {
   const state = renderHook(() => useStoreModules()).result.current
   expect(state.error?.message).toBe('offline')
   expect(state.canAccessModule('pos')).toBe(false)
+})
+
+it('blocks category defaults when the activation request is paused without data', () => {
+  fixture.activations.data = undefined
+  fixture.activations.isLoading = false
+  const state = renderHook(() => useStoreModules()).result.current
+  expect(state.error).toBeInstanceOf(Error)
+  expect(state.availableModules).toEqual([])
+  expect(state.getModuleAccess('pos').reason).toBe('access_unavailable')
 })

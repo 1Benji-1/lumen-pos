@@ -28,8 +28,9 @@ export function useStoreModules() {
   const error = rawError instanceof Error ? rawError : rawError ? new Error(String(rawError))
     : !isLoading && !storeId ? new Error('No se encontró la tienda del usuario.')
     : !isLoading && !profile ? new Error('No se pudo comprobar la sucursal principal.')
+    : !isLoading && !activationRows ? new Error('No se pudieron comprobar las activaciones de módulos.')
     : null
-  const accessUnavailable = isLoading || !!error || !branchId || !profile
+  const accessUnavailable = isLoading || !!error || !branchId || !profile || !activationRows
   const activation = branchId && activationRows
     ? resolveStoredModuleActivation(activationRows.map(row => ({ moduleId: row.module_id, branchId: row.branch_id, enabled: row.enabled })), branchId)
     : {}

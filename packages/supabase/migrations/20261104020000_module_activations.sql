@@ -92,6 +92,11 @@ create index module_activation_audit_store_idx on public.module_activation_audit
 create function public.audit_module_activation()
 returns trigger language plpgsql security definer set search_path = public, pg_temp as $$
 begin
+  -- A tenant deletion also removes its audit history. A cascading activation
+  -- DELETE must not insert a new audit row for the already-deleted parent.
+  if TG_OP='DELETE' and not exists(select 1 from public.stores where id=old.store_id) then
+    return old;
+  end if;
   insert into public.module_activation_audit
     (activation_id,store_id,branch_id,module_id,operation,old_enabled,new_enabled,actor_id)
   values
@@ -116,8 +121,8 @@ create policy "Read own activation audit" on public.module_activation_audit for 
 using (store_id=public.get_my_store_id() or public.is_super_admin());
 revoke all on public.module_catalog,public.module_activations,public.module_activation_audit from public,anon,authenticated;
 grant select on public.module_catalog,public.module_activations,public.module_activation_audit to authenticated;
-grant all on public.module_catalog,public.module_activations,public.module_activation_audit to service_role;
-grant usage,select on sequence public.module_activation_audit_id_seq to service_role;
+grant all on public.module_catalog,public.module_activations to service_role;
+grant select on public.module_activation_audit to service_role;
 revoke all on function public.validate_module_activation() from public,anon,authenticated;
 revoke all on function public.audit_module_activation() from public,anon,authenticated;
 

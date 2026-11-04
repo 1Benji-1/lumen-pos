@@ -38,12 +38,10 @@ select test.ok('owner reads own branch only',
 select test.rejects('owner cannot insert a branch directly',
   $$insert into public.branches(store_id,name,category_id) values
     ('20000000-0000-0000-0000-000000000001','Forged','comercio_general')$$);
-with changed as (
-  update public.branches set name='Forged' where store_id='20000000-0000-0000-0000-000000000001' returning id
-) select test.ok('owner cannot update a branch directly',not exists(select 1 from changed));
-with removed as (
-  delete from public.branches where store_id='20000000-0000-0000-0000-000000000001' returning id
-) select test.ok('owner cannot delete a branch directly',not exists(select 1 from removed));
+select test.rejects('owner cannot update a branch directly',
+  $$update public.branches set name='Forged' where store_id='20000000-0000-0000-0000-000000000001'$$);
+select test.rejects('owner cannot delete a branch directly',
+  $$delete from public.branches where store_id='20000000-0000-0000-0000-000000000001'$$);
 update public.stores set name='A renewed',business_type='tienda_articulos',industry_sub_type='ferreteria_construccion'
 where id='20000000-0000-0000-0000-000000000001';
 select test.ok('owner legacy edits synchronize the primary branch',
