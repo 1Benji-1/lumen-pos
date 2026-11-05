@@ -202,8 +202,91 @@ reset role;
 delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='pos';
 update public.stores set trial_ends_at=now()+interval '7 days'
 where id='20000000-0000-0000-0000-000000000004';
--- The phase-2 persistence test left B's POS disabled to inspect its row.
--- Restore its default before the baseline concurrency suite opens a register.
-delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000002' and module_id='pos';
+-- Transactional RPC entry points must perform their own module check.
+insert into public.cash_registers(id,store_id,opened_by) values
+ ('30000000-0000-0000-0000-000000000006','20000000-0000-0000-0000-000000000004','10000000-0000-0000-0000-000000000010');
+create function test.module_sale(p_key text) returns uuid language sql as $$
+ select public.create_sale('30000000-0000-0000-0000-000000000006','cash',
+ '[{"product_variant_id":"50000000-0000-0000-0000-000000000004","quantity":1,"unit_price":10}]'::jsonb,
+ p_idempotency_key=>p_key);
+$$;
+grant execute on function test.module_sale(text) to authenticated;
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000010',false);
+select test.module_sale('module-replay');
+reset role;
+insert into public.module_activations(store_id,branch_id,module_id,enabled)
+select store_id,id,'pos',false from public.branches
+where store_id='20000000-0000-0000-0000-000000000004' and is_primary;
+set role authenticated;
+select test.denied('disabled_pos_blocks_sale', $$select test.module_sale('module-new')$$);
+select test.denied('new_offline_sale_denied_after_disable',
+ $$select public.create_sale('30000000-0000-0000-0000-000000000006','cash',
+ '[{"product_variant_id":"50000000-0000-0000-0000-000000000004","quantity":1,"unit_price":10}]',
+ p_idempotency_key=>'module-offline',p_created_at=>now()-interval '1 minute')$$);
+select test.ok('same_author_existing_key_returns_same_sale_after_disable',
+ test.module_sale('module-replay')=(select id from public.sales where store_id='20000000-0000-0000-0000-000000000004' and idempotency_key='module-replay'));
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000009',false);
+select test.denied('disabled_pos_blocks_refund',
+ $$select public.refund_sale((select id from public.sales where store_id='20000000-0000-0000-0000-000000000004' and idempotency_key='module-replay'))$$);
+select test.denied('different_author_cannot_replay', $$select test.module_sale('module-replay')$$);
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000010',false);
+select test.denied('different_register_cannot_replay',
+ $$select public.create_sale('30000000-0000-0000-0000-000000000004','cash',
+ '[{"product_variant_id":"50000000-0000-0000-0000-000000000004","quantity":1,"unit_price":10}]',
+ p_idempotency_key=>'module-replay')$$);
+reset role;
+update public.stores set trial_ends_at=now()-interval '1 day'
+where id='20000000-0000-0000-0000-000000000004';
+set role authenticated;
+select test.ok('same_author_existing_key_returns_same_sale_after_expiry',
+ test.module_sale('module-replay')=(select id from public.sales where store_id='20000000-0000-0000-0000-000000000004' and idempotency_key='module-replay'));
+select test.denied('new_sale_denied_after_expiry', $$select test.module_sale('module-expired-new')$$);
+reset role;
+update public.stores set trial_ends_at=now()+interval '7 days'
+where id='20000000-0000-0000-0000-000000000004';
+delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='pos';
+
+insert into public.purchase_orders(id,store_id,supplier_id,order_number,status)
+values ('90000000-0000-0000-0000-000000000005','20000000-0000-0000-0000-000000000004',
+ '80000000-0000-0000-0000-000000000004','RPC-MODULE','draft');
+insert into public.purchase_order_items(purchase_order_id,variant_id,quantity,cost_price,subtotal)
+values ('90000000-0000-0000-0000-000000000005','50000000-0000-0000-0000-000000000004',1,4,4);
+insert into public.module_activations(store_id,branch_id,module_id,enabled)
+select store_id,id,'inventory',false from public.branches
+where store_id='20000000-0000-0000-0000-000000000004' and is_primary;
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000009',false);
+select test.denied('disabled_inventory_blocks_adjust_rpc',
+ $$select public.adjust_variant_stock('50000000-0000-0000-0000-000000000004',2,'manual_adjustment')$$);
+select test.denied('disabled_inventory_blocks_product_create_rpc',
+ $$select public.create_product_with_variant('{"name":"blocked RPC"}','{"sale_price":1}')$$);
+select test.denied('disabled_inventory_blocks_receipt_rpc',
+ $$select public.receive_purchase_order('90000000-0000-0000-0000-000000000005')$$);
+reset role;
+delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='inventory';
+
+insert into public.module_activations(store_id,module_id,enabled)
+values ('20000000-0000-0000-0000-000000000004','customers',false);
+set role authenticated;
+select test.denied('disabled_customers_blocks_duplicate_rpc',
+ $$select * from public.check_duplicate_customer('20000000-0000-0000-0000-000000000004','123')$$);
+reset role;
+delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='customers';
+
+insert into public.module_activations(store_id,module_id,enabled)
+values ('20000000-0000-0000-0000-000000000004','analytics',false);
+set role authenticated;
+select test.denied('disabled_analytics_blocks_report_rpc',
+ $$select public.get_store_analytics(now()-interval '1 day',now())$$);
+reset role;
+delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='analytics';
+select test.ok('unknown_legacy_overload_not_executable',
+ to_regprocedure('public.create_sale(uuid,text,jsonb,uuid,numeric,jsonb,text)') is null);
+-- The phase-2 persistence test left A/B POS disabled to inspect those rows.
+-- Restore their defaults before the baseline concurrency suite uses them.
+delete from public.module_activations
+where store_id in ('20000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000002')
+ and module_id='pos';
 
 do $$begin if exists(select 1 from test.results where not passed) then raise exception 'module authorization regression'; end if; end $$;
