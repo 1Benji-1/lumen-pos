@@ -2,9 +2,16 @@ import { beforeEach, expect, it, vi } from 'vitest'
 
 const db = vi.hoisted(() => ({ from: vi.fn(), rpc: vi.fn(), auth: { getUser: vi.fn() } }))
 vi.mock('../../../shared/lib/supabaseClient', () => ({ supabase: db }))
-import { createSale, getCashRegisterReport } from './posService'
+import { createSale, getCashRegisterReport, openCashRegister } from './posService'
 
 beforeEach(() => vi.clearAllMocks())
+
+it('uses only the minimal register notice when another cashier owns the single open register', async () => {
+  db.rpc.mockResolvedValue({ data: [{ id: 'other-register', opened_by_name: 'Ana' }], error: null })
+  db.from.mockImplementation(() => { throw new Error('Unsafe full register query') })
+  await expect(openCashRegister({ storeId: 'store', userId: 'me', openingAmount: 10 })).rejects.toThrow(/Ana/)
+  expect(db.rpc).toHaveBeenCalledWith('get_open_register_notice')
+})
 
 it('counts original cash receipts and subtracts refund movements once, excluding cancelled sales', async () => {
   const rows: Record<string, unknown> = {

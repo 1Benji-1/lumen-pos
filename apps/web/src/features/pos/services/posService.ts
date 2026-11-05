@@ -34,15 +34,12 @@ export async function openCashRegister(params: {
   allowsMultipleRegisters?: boolean
 }) {
   if (!params.allowsMultipleRegisters) {
-    const { data: existingOpen } = await supabase
-      .from('cash_registers')
-      .select('id, opened_by, users!cash_registers_opened_by_fkey(full_name)')
-      .eq('store_id', params.storeId)
-      .eq('status', 'open')
-      .maybeSingle()
+    const { data: openNotices, error: noticeError } = await supabase.rpc('get_open_register_notice')
+    if (noticeError) throw noticeError
+    const existingOpen = openNotices?.[0]
 
     if (existingOpen) {
-      const openedByName = existingOpen.users?.full_name ?? 'otro usuario'
+      const openedByName = existingOpen.opened_by_name ?? 'otro usuario'
       throw new Error(
         `El plan Standard solo permite una caja abierta a la vez. Actualmente hay una caja abierta por ${openedByName}.`
       )

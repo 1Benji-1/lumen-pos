@@ -283,6 +283,66 @@ reset role;
 delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='analytics';
 select test.ok('unknown_legacy_overload_not_executable',
  to_regprocedure('public.create_sale(uuid,text,jsonb,uuid,numeric,jsonb,text)') is null);
+-- Sensitive reads retain history but enforce fixed role permissions.
+insert into public.cash_registers(id,store_id,opened_by,opening_amount) values
+ ('30000000-0000-0000-0000-000000000007','20000000-0000-0000-0000-000000000004',
+  '10000000-0000-0000-0000-000000000009',77);
+insert into public.cash_movements(store_id,cash_register_id,type,amount,reason,performed_by)
+values ('20000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000007',
+ 'in',3,'read-policy fixture','10000000-0000-0000-0000-000000000009');
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000011',false);
+select test.ok('stock_clerk_cannot_read_customer_or_sales_data',
+ (select count(*)=0 from public.customers where store_id='20000000-0000-0000-0000-000000000004')
+ and (select count(*)=0 from public.sales where store_id='20000000-0000-0000-0000-000000000004'));
+select test.ok('stock_clerk_cannot_read_other_staff_profiles',
+ (select count(*)=1 from public.users where store_id='20000000-0000-0000-0000-000000000004'));
+select test.ok('customer_metrics_invoker_obeys_role',
+ (select count(*)=0 from public.customer_metrics where store_id='20000000-0000-0000-0000-000000000004'));
+select test.denied('stock_clerk_cannot_use_open_register_notice',
+ $$select * from public.get_open_register_notice()$$);
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000010',false);
+select test.ok('cashier_cannot_read_other_register_amounts',
+ (select count(*)=0 from public.cash_registers where id='30000000-0000-0000-0000-000000000007')
+ and (select count(*)=0 from public.cash_movements where cash_register_id='30000000-0000-0000-0000-000000000007'));
+select test.ok('old_permissive_policy_does_not_override_denial',
+ (select count(*)=0 from public.suppliers where store_id='20000000-0000-0000-0000-000000000004'));
+select test.ok('foreign_tenant_history_is_hidden',
+ (select count(*)=0 from public.sales where store_id='20000000-0000-0000-0000-000000000001'));
+select test.ok('open_register_notice_exposes_only_current_tenant_opener',
+ (select id='30000000-0000-0000-0000-000000000007' from public.get_open_register_notice()));
+reset role;
+set role anon;
+select set_config('request.jwt.claim.sub','',false);
+select test.ok('customer_metrics_anon_denied',
+ not has_table_privilege('anon','public.customer_metrics','SELECT'));
+select test.ok('open_register_notice_anon_denied',
+ not has_function_privilege('anon','public.get_open_register_notice()','EXECUTE'));
+reset role;
+
+insert into public.module_activations(store_id,branch_id,module_id,enabled)
+select store_id,id,'pos',false from public.branches
+where store_id='20000000-0000-0000-0000-000000000004' and is_primary;
+update public.stores set trial_ends_at=now()-interval '1 day'
+where id='20000000-0000-0000-0000-000000000004';
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000010',false);
+select test.ok('authorized_history_survives_module_and_subscription_pause',
+ (select count(*)>0 from public.sales where store_id='20000000-0000-0000-0000-000000000004')
+ and (select count(*)>0 from public.cash_registers where opened_by=auth.uid()));
+reset role;
+delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='pos';
+update public.stores set trial_ends_at=now()+interval '7 days'
+where id='20000000-0000-0000-0000-000000000004';
+insert into public.module_activations(store_id,branch_id,module_id,enabled)
+select store_id,id,'inventory',false from public.branches
+where store_id='20000000-0000-0000-0000-000000000004' and is_primary;
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000010',false);
+select test.ok('pos_can_read_catalog_when_inventory_off',
+ (select count(*)>0 from public.products where store_id='20000000-0000-0000-0000-000000000004'));
+reset role;
+delete from public.module_activations where store_id='20000000-0000-0000-0000-000000000004' and module_id='inventory';
 -- The phase-2 persistence test left A/B POS disabled to inspect those rows.
 -- Restore their defaults before the baseline concurrency suite uses them.
 delete from public.module_activations

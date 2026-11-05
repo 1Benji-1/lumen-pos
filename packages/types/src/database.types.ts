@@ -1358,6 +1358,10 @@ export type Database = {
         Returns: string
       }
       get_admin_stores_overview: { Args: never; Returns: Json }
+      get_open_register_notice: {
+        Args: never
+        Returns: { id: string; opened_by_name: string }[]
+      }
       get_my_role: { Args: never; Returns: string }
       get_my_store_id: { Args: never; Returns: string }
       get_store_analytics: {
