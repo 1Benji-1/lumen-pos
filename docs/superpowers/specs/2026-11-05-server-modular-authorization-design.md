@@ -1,6 +1,6 @@
 # Autorización modular en SQL y servidor — diseño propuesto de fase 3
 
-**Estado:** pendiente de aprobación. **Base:** `80f63d8` en `codex/stabilization-baseline`.
+**Estado:** aprobado el 2026-11-05. **Base:** `80f63d8` en `codex/stabilization-baseline`.
 
 ## Intención y alcance
 
