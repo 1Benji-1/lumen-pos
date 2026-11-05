@@ -60,7 +60,7 @@ Las operaciones de escritura comprobarán la activación dentro de su transacci�
 
 1. Primero, pruebas PostgreSQL fallidas para cada frontera: llamada directa/RPC/Edge Function, rol, plan, categoría, activación explícita, usuario suspendido, suscripción y tenant ajeno. Verificar que un `enabled=true` no supera un plan denegado y que una categoría sin módulo permanece cerrada sin excepción.
 2. Añadir pruebas de historia, devolución, cierre de caja, repetición idempotente, inventario descontado por venta, firma RPC antigua y desactivación concurrente. Ejecutar cada caso en rojo antes del cambio mínimo y en verde después.
-3. Probar paridad de matrices TypeScript/SQL y el comportamiento minorista sin excepciones. Ejecutar `pnpm test:db` y `pnpm check` con resultados frescos. La prueba autenticada real requiere Supabase local y un archivo privado de estado fuera del repositorio: `pnpm test:api:auth -- /ruta/privada/status.json`; ejecutarla cuando estén disponibles y declarar explícitamente si no lo están. No imprimir ni versionar ese archivo.
+3. Probar paridad de matrices TypeScript/SQL y el comportamiento minorista sin excepciones. Ejecutar `pnpm test:db` y `pnpm check` con resultados frescos. La prueba autenticada real requiere Supabase local y un archivo privado de estado fuera del repositorio: `pnpm test:api:auth /ruta/privada/status.json`; ejecutarla cuando estén disponibles y declarar explícitamente si no lo están. No imprimir ni versionar ese archivo.
 4. Revisar el diff y las pruebas con **Antigravity** al final, resolver hallazgos y repetir las comprobaciones afectadas antes de integrar. Si Antigravity no estuviera disponible en el entorno, detener la integración y comunicarlo.
 
 ## Exclusiones y riesgos a vigilar

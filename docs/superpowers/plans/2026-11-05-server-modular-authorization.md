@@ -110,7 +110,7 @@
 
 - [ ] Write `activation_change_serializes_with_sale` as a failing concurrency test and wire it into `scripts/test-db.sh`.
 - [ ] Run `pnpm test:db`; confirm the new race assertion fails if synchronization is absent and passes only when the lock order is correct. Fix the smallest violating boundary if needed.
-- [ ] Run `pnpm test:db` and `pnpm check` fresh. If Supabase local and a private status file exist, run `pnpm test:api:auth -- /ruta/privada/status.json`; otherwise record it as not run, never as passing. Do not print or commit that file.
+- [ ] Run `pnpm test:db` and `pnpm check` fresh. If Supabase local and a private status file exist, run `pnpm test:api:auth /ruta/privada/status.json`; otherwise record it as not run, never as passing. Do not print or commit that file.
 - [ ] Review the complete diff and test evidence with Antigravity, fix findings, then rerun affected checks. If Antigravity is unavailable, stop before integration and report that gate. Confirm no activation UI or multi-branch operation entered the diff.
 - [ ] Commit any race/review fixes as `test(access): verify module activation races` (omit an empty commit), then hand the branch back for integration review.
 
