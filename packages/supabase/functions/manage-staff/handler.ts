@@ -98,6 +98,33 @@ return async (req: Request) => {
       })
     }
 
+    if (!isSuperAdmin) {
+      const supabaseUser = createClient(
+        env('SUPABASE_URL')!,
+        env('SUPABASE_ANON_KEY')!,
+        {
+          global: { headers: { Authorization: authHeader } },
+          auth: { persistSession: false, autoRefreshToken: false },
+        }
+      )
+      const { data: authorizedStoreId, error: moduleError } = await supabaseUser.rpc(
+        'require_active_module',
+        { p_module_id: 'staff', p_permission: 'staff:manage' }
+      )
+      if (moduleError?.code === '42501' || (!moduleError && authorizedStoreId !== callerProfile?.store_id)) {
+        return new Response(JSON.stringify({ error: 'Módulo de colaboradores no habilitado' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (moduleError) {
+        return new Response(JSON.stringify({ error: 'No se pudo verificar el acceso al módulo' }), {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
     // Resolve membership before any privileged Auth or profile mutation. A filtered
     // DELETE that affects zero rows is not evidence that the target belongs here.
     if (['update-role', 'toggle-status', 'reset-password', 'delete'].includes(action)) {

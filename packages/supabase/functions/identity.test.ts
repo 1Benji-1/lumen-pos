@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createHandler as staffHandler } from './manage-staff/handler'
 import { createHandler as storeHandler } from './create-store/handler'
 
-function fixture(options: { inactive?: boolean; role?: string; profileError?: boolean; storeError?: boolean; superAdmin?: boolean; maxUsers?: number; authDeleteError?: boolean; profileThrows?: boolean; existingInvite?: boolean } = {}) {
+function fixture(options: { inactive?: boolean; role?: string; profileError?: boolean; storeError?: boolean; superAdmin?: boolean; maxUsers?: number; authDeleteError?: boolean; profileThrows?: boolean; existingInvite?: boolean; moduleDenied?: boolean; moduleError?: boolean; moduleTenant?: string } = {}) {
   const records: Record<string, any[]> = {
     users: [
       { id: 'caller', store_id: 'a', role: options.role ?? 'owner', is_active: !options.inactive },
@@ -14,14 +14,15 @@ function fixture(options: { inactive?: boolean; role?: string; profileError?: bo
     plans: [{ id: 'plan', code: 'pro' }],
   }
   const authUsers = new Set(['caller', 'foreign', 'owner', 'admin'])
+  const authMutations: string[] = []
   const client = {
     auth: {
       getUser: async () => ({ data: { user: { id: 'caller', app_metadata: { is_super_admin: options.superAdmin } } }, error: null }),
       admin: {
-        deleteUser: async (id: string) => { if (options.authDeleteError) return { error: { message: 'Auth unavailable' } }; authUsers.delete(id); records.users = records.users.filter(user => user.id !== id); return { error: null } },
-        updateUserById: async () => ({ error: null }),
-        createUser: async () => { authUsers.add('new'); return { data: { user: { id: 'new' } }, error: null } },
-        inviteUserByEmail: async () => { if (options.existingInvite) return { data: { user: { id: 'foreign' } }, error: null }; authUsers.add('new'); return { data: { user: { id: 'new' } }, error: null } },
+        deleteUser: async (id: string) => { authMutations.push(`delete:${id}`); if (options.authDeleteError) return { error: { message: 'Auth unavailable' } }; authUsers.delete(id); records.users = records.users.filter(user => user.id !== id); return { error: null } },
+        updateUserById: async (id: string) => { authMutations.push(`update:${id}`); return { error: null } },
+        createUser: async () => { authMutations.push('create'); authUsers.add('new'); return { data: { user: { id: 'new' } }, error: null } },
+        inviteUserByEmail: async () => { authMutations.push('invite'); if (options.existingInvite) return { data: { user: { id: 'foreign' } }, error: null }; authUsers.add('new'); return { data: { user: { id: 'new' } }, error: null } },
       },
     },
     from(table: string) {
@@ -51,14 +52,68 @@ function fixture(options: { inactive?: boolean; role?: string; profileError?: bo
       return query
     },
   }
+  const scopedClient = {
+    rpc: async (name: string, args: Record<string, unknown>) => {
+      if (name !== 'require_active_module' || args.p_module_id !== 'staff' || args.p_permission !== 'staff:manage') throw new Error('Wrong authorization contract')
+      if (options.moduleError) return { data: null, error: { code: 'PGRST000', message: 'database unavailable' } }
+      if (options.moduleDenied) return { data: null, error: { code: '42501', message: 'module disabled' } }
+      return { data: options.moduleTenant ?? 'a', error: null }
+    },
+  }
+  const clientFactory = (_url: string, _key: string, config?: any) =>
+    config?.global?.headers?.Authorization === 'Bearer token' ? scopedClient : client
   const request = (body: any, method = 'POST') => new Request('https://test.local', { method, headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' }, ...(method === 'POST' ? { body: JSON.stringify(body) } : {}) })
-  return { records, authUsers, staff: (body: any) => staffHandler(() => client, () => 'test')(request(body)), store: (body: any, method?: string) => storeHandler(() => client, () => 'test')(request(body, method)) }
+  return { records, authUsers, authMutations, staff: (body: any) => staffHandler(clientFactory, () => 'test')(request(body)), store: (body: any, method?: string) => storeHandler(clientFactory, () => 'test')(request(body, method)) }
 }
 
 const newStaff = { action: 'create', email: 'test@example.com', fullName: 'Test', role: 'cashier', password: 'abcdef' }
 const newStore = { email: 'test@example.com', storeName: 'Store', fullName: 'Test', planCode: 'pro', subscriptionStatus: 'active' }
 
 describe('staff authorization', () => {
+  it.each([
+    newStaff,
+    { ...newStaff, action: 'invite', password: undefined },
+    { action: 'update-role', userId: 'admin', role: 'cashier' },
+    { action: 'toggle-status', userId: 'admin', isActive: false },
+    { action: 'reset-password', userId: 'admin', newPassword: 'abcdef' },
+    { action: 'delete', userId: 'admin' },
+  ])('denied_staff_action_has_no_side_effects: $action', async body => {
+    const f = fixture({ moduleDenied: true })
+    const before = JSON.stringify(f.records)
+    const response = await f.staff(body)
+    expect(response.status).toBe(403)
+    expect(f.authMutations).toEqual([])
+    expect(JSON.stringify(f.records)).toBe(before)
+  })
+  it('db_authorization_error_fails_closed', async () => {
+    const f = fixture({ moduleError: true })
+    expect((await f.staff(newStaff)).status).toBe(503)
+    expect(f.authMutations).toEqual([])
+  })
+  it('rejects a module decision for a different tenant', async () => {
+    const f = fixture({ moduleTenant: 'b' })
+    expect((await f.staff(newStaff)).status).toBe(403)
+    expect(f.authMutations).toEqual([])
+  })
+  it('foreign_store_id_is_ignored for a normal caller', async () => {
+    const f = fixture()
+    expect((await f.staff({ ...newStaff, storeId: 'b' })).status).toBe(200)
+    expect(f.records.users.find(user => user.id === 'new')?.store_id).toBe('a')
+  })
+  it('superadmin_mfa_path_remains_separate from tenant module access', async () => {
+    const f = fixture({ superAdmin: true, moduleDenied: true })
+    expect((await f.staff({ ...newStaff, storeId: 'a' })).status).toBe(200)
+    expect(f.authMutations).toContain('create')
+  })
+  it('authorized_owner_admin_keep_existing_role_limit_rules', async () => {
+    const owner = fixture()
+    expect((await owner.staff(newStaff)).status).toBe(200)
+    expect(owner.records.users.find(user => user.id === 'new')?.role).toBe('cashier')
+
+    const admin = fixture({ role: 'admin' })
+    expect((await admin.staff(newStaff)).status).toBe(200)
+    expect((await admin.staff({ ...newStaff, role: 'owner' })).status).toBe(403)
+  })
   it('never deletes Auth belonging to a different store', async () => {
     const f = fixture(); const response = await f.staff({ action: 'delete', userId: 'foreign' })
     expect(response.status).toBe(403); expect(f.authUsers.has('foreign')).toBe(true)
