@@ -2,6 +2,8 @@
 
 **Estado:** aprobado el 2026-11-05. **Base:** `80f63d8` en `codex/stabilization-baseline`.
 
+**Cierre:** el usuario dispensó la revisión final con Antigravity el 2026-11-05. La implementación se verificará con las suites SQL y del proyecto antes de cerrar la fase.
+
 ## Intención y alcance
 
 Hacer que la decisión modular persistida en la fase 2 se aplique donde se ejecutan las operaciones, aunque alguien llame directamente a PostgREST, a una RPC o a una Edge Function. Se conserva `stores.id` como límite del cliente y la sucursal principal como único contexto operativo. No se construyen la interfaz de activación ni la operación multisucursal.

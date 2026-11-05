@@ -113,3 +113,5 @@
 - [ ] Run `pnpm test:db` and `pnpm check` fresh. If Supabase local and a private status file exist, run `pnpm test:api:auth -- /ruta/privada/status.json`; otherwise record it as not run, never as passing. Do not print or commit that file.
 - [ ] Review the complete diff and test evidence with Antigravity, fix findings, then rerun affected checks. If Antigravity is unavailable, stop before integration and report that gate. Confirm no activation UI or multi-branch operation entered the diff.
 - [ ] Commit any race/review fixes as `test(access): verify module activation races` (omit an empty commit), then hand the branch back for integration review.
+
+**Closure note (2026-11-05):** The user explicitly waived the Antigravity review after the CLI could not produce a report. This gate is waived, not passed. The race test and implementation commits are complete; finish with fresh verification and preserve the branch for subsequent work.
