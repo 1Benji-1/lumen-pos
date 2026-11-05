@@ -56,5 +56,10 @@ sql < "$root/packages/supabase/tests/module-activations.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/module-authorization.sql" || test_status=$?
 node --experimental-strip-types "$root/scripts/module-catalog-expected.mjs" | sql || test_status=$?
 bash "$root/packages/supabase/tests/concurrency.sh" "$container" || test_status=$?
+# Regression probe: disable only the serialization trigger in this disposable DB.
+if [[ "${DB_TEST_DISABLE_ACTIVATION_LOCK:-0}" == 1 ]]; then
+  sql -c 'drop trigger lock_module_activation_before_write on public.module_activations;'
+fi
+bash "$root/packages/supabase/tests/module-authorization-concurrency.sh" "$container" || test_status=$?
 if [[ "$test_status" != 0 ]]; then exit "$test_status"; fi
 printf 'PostgreSQL behavioral tests passed (controlled Auth identities).\n'
