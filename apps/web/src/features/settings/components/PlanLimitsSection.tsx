@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { useStoreId } from '../../../shared/hooks/useStoreId'
 import { useStorePlan } from '../../../shared/hooks/useStorePlan'
 import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
+import { useStoreModules } from '../../../shared/hooks/useStoreModules'
 import { useStaff } from '../../staff/hooks/useStaff'
-import { PLAN_DEFAULT_LIMITS, SYSTEM_FEATURES, type PlanCode } from '@lumen-pos/types'
+import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, PLAN_DEFAULT_LIMITS, SYSTEM_FEATURES, type PlanCode } from '@lumen-pos/types'
 
 export function PlanLimitsSection() {
   const { storeId } = useStoreId()
   const { data: storePlan, isLoading: planLoading } = useStorePlan(storeId)
   const { isFeatureEnabled, getLimit } = useStoreEntitlements()
+  const { profile, isLoading: modulesLoading } = useStoreModules()
   const { data: staff, isLoading: staffLoading } = useStaff(storeId)
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
@@ -18,7 +20,6 @@ export function PlanLimitsSection() {
   const planCode = (storePlan?.plans?.code as PlanCode) || 'standard'
   const planName = storePlan?.plans?.name || 'Estándar'
   const status = storePlan?.subscription_status || 'active'
-  const subType = storePlan?.industry_sub_type || 'comercio_general'
 
   const isTopTier = planCode === 'enterprise'
 
@@ -46,7 +47,7 @@ export function PlanLimitsSection() {
     }, 2500)
   }
 
-  if (planLoading || staffLoading) {
+  if (planLoading || staffLoading || modulesLoading) {
     return (
       <div className="py-12 text-center text-xs text-[#5A5D5A]">
         Cargando información del plan y límites...
@@ -97,16 +98,18 @@ export function PlanLimitsSection() {
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="max-w-md">
               <span className="text-xs font-semibold text-[#242423] block">
-                Especialidad comercial
+                Familia y categoría comercial
               </span>
               <span className="text-xs text-[#5A5D5A] block mt-0.5">
-                Rubro asignado a la tienda para el catálogo y flujo de cobro.
+                Perfil de la sucursal principal que define sus módulos iniciales.
               </span>
             </div>
             <div className="w-full sm:w-80 shrink-0 flex sm:justify-end">
-              <span className="text-xs font-semibold text-[#242423] capitalize bg-[#E8EDDF] px-2.5 py-1 rounded border border-[#CFDBD5]">
-                {subType.replace(/_/g, ' ')}
-              </span>
+              {profile ? <span className="text-xs font-semibold text-[#242423] bg-[#E8EDDF] px-2.5 py-1 rounded border border-[#CFDBD5] flex flex-wrap gap-1">
+                <span>{BUSINESS_FAMILIES[profile.familyId].name}</span>
+                <span aria-hidden="true">·</span>
+                <span>{BUSINESS_CATEGORIES[profile.categoryId].name}</span>
+              </span> : <span className="text-xs text-[#BC4749]">Perfil no disponible</span>}
             </div>
           </div>
         </div>

@@ -20,9 +20,10 @@ import { ConfirmationModal, type ChangeItem } from '../../shared/components/Conf
 import { StoreStatusBadge } from './components/StoreStatusBadge'
 import { BusinessTypeBadge } from './components/BusinessTypeBadge'
 import { StoreOverridesTab } from './components/StoreOverridesTab'
+import { StoreModulesTab } from './components/StoreModulesTab'
 import { useToast } from '../../shared/context/ToastContext'
 
-type TabKey = 'overview' | 'subscription' | 'staff' | 'registers' | 'payments' | 'overrides'
+type TabKey = 'overview' | 'subscription' | 'staff' | 'registers' | 'payments' | 'overrides' | 'modules'
 
 export function StoreDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -34,7 +35,7 @@ export function StoreDetailPage() {
   const { data: plans = [] } = usePlans()
 
   const currentTab = (searchParams.get('tab') as TabKey) || 'overview'
-  const activeTab: TabKey = ['overview', 'subscription', 'staff', 'registers', 'payments', 'overrides'].includes(currentTab)
+  const activeTab: TabKey = ['overview', 'subscription', 'staff', 'registers', 'payments', 'overrides', 'modules'].includes(currentTab)
     ? currentTab
     : 'overview'
 
@@ -411,6 +412,7 @@ export function StoreDetailPage() {
                 <BusinessTypeBadge
                   businessType={store.business_type}
                   industrySubType={store.industry_sub_type}
+                  categoryId={store.category_id}
                 />
                 <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                   {store.plan_name || 'Sin plan'}
@@ -532,6 +534,13 @@ export function StoreDetailPage() {
               {overridesCount}
             </span>
           )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('modules')}
+          className={`px-4 py-2.5 text-xs font-semibold transition border-b-2 cursor-pointer shrink-0 ${activeTab === 'modules' ? 'border-zinc-900 dark:border-zinc-100 text-zinc-950 dark:text-white bg-zinc-100/60 dark:bg-zinc-800/40' : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'}`}
+        >
+          Perfil modular
         </button>
       </div>
 
@@ -1112,6 +1121,7 @@ export function StoreDetailPage() {
       {activeTab === 'overrides' && (
         <StoreOverridesTab store={store} />
       )}
+      {activeTab === 'modules' && <StoreModulesTab store={store} />}
 
       <ConfirmationModal
         isOpen={isConfirmSuspensionOpen}

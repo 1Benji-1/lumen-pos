@@ -10,6 +10,7 @@ import { InventoryStockSection } from './components/InventoryStockSection'
 import { InventoryLabelsSection } from './components/InventoryLabelsSection'
 import { InventoryAuditSection } from './components/InventoryAuditSection'
 import { PlanLimitsSection } from './components/PlanLimitsSection'
+import { ModuleSettingsSection } from './components/ModuleSettingsSection'
 
 const SECTION_HEADERS: Record<SettingsSectionId, { title: string; subtitle: string }> = {
   general: {
@@ -47,6 +48,10 @@ const SECTION_HEADERS: Record<SettingsSectionId, { title: string; subtitle: stri
   plan_limits: {
     title: 'Plan y Límites de la Tienda',
     subtitle: 'Nivel de suscripción actual, consumo de colaboradores y opciones de ampliación.',
+  },
+  modules: {
+    title: 'Módulos de la tienda',
+    subtitle: 'Categoría, disponibilidad y activación de herramientas para la sucursal principal.',
   },
 }
 
@@ -93,6 +98,7 @@ export function SettingsPage() {
               {activeSection === 'inventory_labels' && <InventoryLabelsSection settings={settings} />}
               {activeSection === 'inventory_audit' && <InventoryAuditSection settings={settings} />}
               {activeSection === 'plan_limits' && <PlanLimitsSection />}
+              {activeSection === 'modules' && <ModuleSettingsSection />}
             </>
           )}
         </div>

@@ -2,6 +2,8 @@ import { supabase } from '../../../shared/lib/supabaseClient'
 import type {
   BusinessType,
   RetailSubType,
+  BusinessFamilyId,
+  BusinessCategoryId,
   PlanCode,
   AdminStoreItem,
   SubscriptionStatus,
@@ -44,8 +46,10 @@ export async function createStore(params: {
   email: string
   storeName: string
   fullName: string
-  businessType: BusinessType
+  businessType?: BusinessType
   industrySubType?: RetailSubType
+  familyId?: BusinessFamilyId
+  categoryId?: BusinessCategoryId
   planCode: PlanCode
   subscriptionStatus: 'trialing' | 'active'
   billingCycle?: 'monthly' | 'semiannual' | 'annual'
@@ -64,11 +68,31 @@ export async function createStore(params: {
   return data
 }
 
+export async function getStoreModuleDetails(storeId: string) {
+  const [branchResult, activationResult, auditResult] = await Promise.all([
+    supabase.from('branches').select('id, name, category_id').eq('store_id', storeId).eq('is_primary', true).single(),
+    supabase.from('module_activations').select('module_id, branch_id, enabled').eq('store_id', storeId),
+    supabase.from('module_activation_audit').select('id, module_id, operation, old_enabled, new_enabled, changed_at').eq('store_id', storeId).order('changed_at', { ascending: false }).limit(20),
+  ])
+  if (branchResult.error) throw new Error(branchResult.error.message)
+  if (activationResult.error) throw new Error(activationResult.error.message)
+  if (auditResult.error) throw new Error(auditResult.error.message)
+  return { branch: branchResult.data, activations: activationResult.data ?? [], audit: auditResult.data ?? [] }
+}
+
+async function withBranchCategories(stores: AdminStoreItem[]): Promise<AdminStoreItem[]> {
+  if (stores.length === 0) return stores
+  const { data, error } = await supabase.from('branches').select('store_id, category_id').in('store_id', stores.map(store => store.id)).eq('is_primary', true)
+  if (error) throw new Error(error.message)
+  const categories = new Map((data ?? []).map(branch => [branch.store_id, branch.category_id as BusinessCategoryId]))
+  return stores.map(store => ({ ...store, category_id: categories.get(store.id) }))
+}
+
 export async function getStores(): Promise<AdminStoreItem[]> {
   const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('get_admin_stores_overview')
 
   if (!rpcError && Array.isArray(rpcData)) {
-    return rpcData.map((row: any) => ({
+    return withBranchCategories(rpcData.map((row: any) => ({
       id: row.id,
       name: row.name,
       owner_id: row.owner_id,
@@ -92,7 +116,7 @@ export async function getStores(): Promise<AdminStoreItem[]> {
       open_registers_count: row.open_registers_count ?? 0,
       active_users_count: row.active_users_count ?? 0,
       customers_count: row.customers_count ?? 0,
-    }))
+    })))
   }
 
   const { data, error } = await supabase
@@ -128,7 +152,7 @@ export async function getStores(): Promise<AdminStoreItem[]> {
 
   if (error) throw new Error(error.message)
 
-  return (data || []).map((row: any) => {
+  return withBranchCategories((data || []).map((row: any) => {
     const ownerUser = Array.isArray(row.users)
       ? row.users.find((u: any) => u.role === 'owner') || row.users[0]
       : row.users
@@ -155,7 +179,7 @@ export async function getStores(): Promise<AdminStoreItem[]> {
       created_at: row.created_at,
       feature_overrides: (row.feature_overrides as Record<string, any>) || {},
     }
-  })
+  }))
 }
 
 export async function getPlans(): Promise<PlanItem[]> {

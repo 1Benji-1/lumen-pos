@@ -7,6 +7,7 @@ export type SettingsSectionId =
   | 'inventory_stock'
   | 'inventory_labels'
   | 'inventory_audit'
+  | 'modules'
   | 'plan_limits'
 
 export interface SettingsGroup {
@@ -42,6 +43,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     group: 'Cuenta',
     items: [
       { id: 'plan_limits', label: 'Plan y Límites' },
+      { id: 'modules', label: 'Módulos' },
     ],
   },
 ]

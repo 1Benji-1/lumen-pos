@@ -1,4 +1,5 @@
 import type { BusinessType, RetailSubType } from './business'
+import type { BusinessCategoryId } from './commerce'
 
 export type PlanCode = 'standard' | 'pro' | 'enterprise'
 
@@ -129,6 +130,7 @@ export interface AdminStoreItem {
   owner_email: string | null
   business_type: BusinessType
   industry_sub_type?: RetailSubType | string
+  category_id?: BusinessCategoryId
   plan_id: string | null
   plan_code: PlanCode | null
   plan_name: string | null

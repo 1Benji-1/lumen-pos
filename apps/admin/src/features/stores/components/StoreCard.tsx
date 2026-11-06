@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import type { AdminStoreItem } from '@lumen-pos/types'
+import { BUSINESS_CATEGORIES, type AdminStoreItem } from '@lumen-pos/types'
 import { StoreStatusBadge } from './StoreStatusBadge'
 import { getStoreExpirationInfo } from './StoresTable'
 
@@ -65,7 +65,7 @@ export function StoreCard({
               </h3>
             </button>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              <span>{store.industry_sub_type || 'Comercio retail'}</span>
+              <span>{store.category_id ? BUSINESS_CATEGORIES[store.category_id].name : store.industry_sub_type || 'Comercio retail'}</span>
               <span className="text-zinc-400 dark:text-zinc-500" aria-hidden="true">·</span>
               <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">ID: {store.id.slice(0, 8)}</span>
             </div>

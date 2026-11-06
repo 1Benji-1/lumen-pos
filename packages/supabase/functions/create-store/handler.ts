@@ -4,6 +4,13 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+const familyCategories: Record<string, readonly string[]> = {
+  retail: ['comercio_general', 'minimarket_abarrotes', 'ropa_calzado', 'ferreteria_construccion', 'farmacia_belleza', 'libreria_papeleria', 'tecnologia_celulares', 'repuestos', 'tienda_mascotas'],
+  gastronomy: ['restaurante_tradicional', 'cafeteria', 'bar', 'panaderia', 'comida_rapida', 'dark_kitchen'],
+  services: ['barberia_belleza', 'lavanderia', 'taller', 'servicio_tecnico'],
+  wholesale: ['mayorista_general', 'distribuidor'],
+}
+
 function getInitialSubscriptionEnd(billingCycle: string): string {
   const start = new Date()
   const end = new Date(start)
@@ -78,6 +85,8 @@ return async (req: Request) => {
       billingCycle,
       businessType,
       industrySubType,
+      familyId,
+      categoryId,
     } = body
 
     if ([email, storeName, fullName, planCode, subscriptionStatus].some(value => typeof value !== 'string' || !value.trim()) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -89,8 +98,15 @@ return async (req: Request) => {
 
     if (billingCycle != null && !['monthly', 'semiannual', 'annual'].includes(billingCycle)) return new Response(JSON.stringify({ error: 'Ciclo de facturación no válido' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
+    if ((familyId != null || categoryId != null) &&
+      (typeof familyId !== 'string' || typeof categoryId !== 'string' || !familyCategories[familyId]?.includes(categoryId))) {
+      return new Response(JSON.stringify({ error: 'Familia o categoría comercial no válida' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const validBusinessTypes = ['tienda_articulos', 'restaurante', 'supermercado']
-    const assignedBusinessType = businessType ?? 'tienda_articulos'
+    const assignedBusinessType = categoryId
+      ? familyId === 'gastronomy' ? 'restaurante' : 'tienda_articulos'
+      : businessType ?? 'tienda_articulos'
     if (!validBusinessTypes.includes(assignedBusinessType)) {
       return new Response(
         JSON.stringify({
@@ -111,7 +127,8 @@ return async (req: Request) => {
     ]
     if (industrySubType != null && !validIndustrySubTypes.includes(industrySubType)) return new Response(JSON.stringify({ error: 'Subtipo de comercio no válido' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     const assignedIndustrySubType =
-      industrySubType && validIndustrySubTypes.includes(industrySubType)
+      categoryId && validIndustrySubTypes.includes(categoryId) ? categoryId
+      : !categoryId && industrySubType && validIndustrySubTypes.includes(industrySubType)
         ? industrySubType
         : 'comercio_general'
 
@@ -193,10 +210,26 @@ return async (req: Request) => {
 
     createdStoreId = store.id
 
+    if (categoryId) {
+      const { data: primaryBranch, error: branchError } = await supabaseAdmin
+        .from('branches')
+        .update({ category_id: categoryId })
+        .eq('store_id', store.id)
+        .eq('is_primary', true)
+        .select('id')
+        .single()
+      if (branchError || !primaryBranch) {
+        if (!await rollback()) return new Response(JSON.stringify({ error: 'No se pudo revertir la categoría de la tienda', userId, storeId: store.id }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        rollback = null
+        return new Response(JSON.stringify({ error: branchError?.message ?? 'No se pudo asignar la categoría' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    }
+
     const { error: profileError } = await supabaseAdmin.from('users').insert({
       id: userId,
       store_id: store.id,
       full_name: fullName,
+      email: email.trim().toLowerCase(),
       role: 'owner',
     })
 

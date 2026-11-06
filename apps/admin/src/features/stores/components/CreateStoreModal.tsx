@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { createStore } from '../services/adminStoreService'
-import { RETAIL_SUBTYPES, type BusinessType, type RetailSubType, type PlanCode } from '@lumen-pos/types'
+import { BUSINESS_FAMILIES, BUSINESS_CATEGORIES, getDefaultModuleIds, MODULE_REGISTRY, type BusinessFamilyId, type BusinessCategoryId, type PlanCode } from '@lumen-pos/types'
 
 interface CreateStoreModalProps {
   isOpen: boolean
@@ -13,8 +13,8 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
   const [email, setEmail] = useState('')
   const [storeName, setStoreName] = useState('')
   const [fullName, setFullName] = useState('')
-  const [businessType, setBusinessType] = useState<BusinessType>('tienda_articulos')
-  const [industrySubType, setIndustrySubType] = useState<RetailSubType>('comercio_general')
+  const [familyId, setFamilyId] = useState<BusinessFamilyId>('retail')
+  const [categoryId, setCategoryId] = useState<BusinessCategoryId>('comercio_general')
   const [planCode, setPlanCode] = useState<PlanCode>('standard')
   const [subscriptionStatus, setSubscriptionStatus] = useState<'trialing' | 'active'>('trialing')
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'semiannual' | 'annual'>('monthly')
@@ -46,8 +46,8 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
         email: email.trim(),
         storeName: storeName.trim(),
         fullName: fullName.trim(),
-        businessType,
-        industrySubType: businessType === 'tienda_articulos' ? industrySubType : undefined,
+        familyId,
+        categoryId,
         planCode,
         subscriptionStatus,
         billingCycle: subscriptionStatus === 'active' ? billingCycle : undefined,
@@ -70,8 +70,8 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
     setEmail('')
     setStoreName('')
     setFullName('')
-    setBusinessType('tienda_articulos')
-    setIndustrySubType('comercio_general')
+    setFamilyId('retail')
+    setCategoryId('comercio_general')
     setPlanCode('standard')
     setSubscriptionStatus('trialing')
     setBillingCycle('monthly')
@@ -122,10 +122,11 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
+            <label htmlFor="create-store-name" className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
               Nombre de la tienda
             </label>
             <input
+              id="create-store-name"
               type="text"
               required
               placeholder="Ej. Ferretería Central"
@@ -136,10 +137,11 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
+            <label htmlFor="create-owner-name" className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
               Nombre del propietario
             </label>
             <input
+              id="create-owner-name"
               type="text"
               required
               placeholder="Nombre completo"
@@ -150,10 +152,11 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
+            <label htmlFor="create-owner-email" className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
               Correo electrónico del propietario
             </label>
             <input
+              id="create-owner-email"
               type="email"
               required
               placeholder="propietario@comercio.com"
@@ -164,35 +167,37 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
-              Rubro del comercio
+            <label htmlFor="create-family" className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
+              Familia comercial
             </label>
-            <input
-              type="text"
-              readOnly
-              value="Tienda de artículos"
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-lg text-xs text-zinc-500 dark:text-zinc-400 cursor-not-allowed"
-            />
+            <select id="create-family" value={familyId} onChange={(e) => {
+              const nextFamily = e.target.value as BusinessFamilyId
+              setFamilyId(nextFamily)
+              setCategoryId(Object.values(BUSINESS_CATEGORIES).find(category => category.familyId === nextFamily)!.id)
+            }} className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100 transition">
+              {Object.values(BUSINESS_FAMILIES).map(family => <option key={family.id} value={family.id}>{family.name}</option>)}
+            </select>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
-              Especialidad
+            <label htmlFor="create-category" className="block text-xs font-medium text-zinc-800 dark:text-zinc-300 mb-1">
+              Categoría
             </label>
             <select
-              value={industrySubType}
-              onChange={(e) => setIndustrySubType(e.target.value as RetailSubType)}
+              id="create-category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value as BusinessCategoryId)}
               className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100 transition"
               required
             >
-              {Object.values(RETAIL_SUBTYPES).map((sub) => (
-                <option key={sub.code} value={sub.code}>
-                  {sub.name}
+              {Object.values(BUSINESS_CATEGORIES).filter(category => category.familyId === familyId).map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
                 </option>
               ))}
             </select>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-              {RETAIL_SUBTYPES[industrySubType]?.description ?? ''}
+              {getDefaultModuleIds(categoryId).filter(id => MODULE_REGISTRY[id].implementationStatus === 'available').map(id => MODULE_REGISTRY[id].name).join(' · ')} disponibles según plan. Los demás módulos de esta categoría están planificados.
             </p>
           </div>
 

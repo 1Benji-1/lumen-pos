@@ -171,7 +171,7 @@ export function StoresTable({ stores }: StoresTableProps) {
       `"${s.name.replace(/"/g, '""')}"`,
       `"${(s.owner_name || '').replace(/"/g, '""')}"`,
       s.owner_email || '',
-      s.industry_sub_type || s.business_type || '',
+      s.category_id || s.industry_sub_type || s.business_type || '',
       s.plan_name || s.plan_code,
       s.subscription_status,
       s.open_registers_count ?? 0,

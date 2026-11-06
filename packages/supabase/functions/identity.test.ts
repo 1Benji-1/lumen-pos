@@ -11,6 +11,7 @@ function fixture(options: { inactive?: boolean; role?: string; profileError?: bo
       { id: 'admin', store_id: 'a', role: 'admin', is_active: true },
     ],
     stores: [{ id: 'a', plans: { features: { max_users: options.maxUsers ?? 20 } }, feature_overrides: {} }],
+    branches: [],
     plans: [{ id: 'plan', code: 'pro' }],
   }
   const authUsers = new Set(['caller', 'foreign', 'owner', 'admin'])
@@ -43,7 +44,11 @@ function fixture(options: { inactive?: boolean; role?: string; profileError?: bo
             return Promise.resolve({ data: null, error: { message: 'insert failed' } }).then(resolve)
           }
           let data = rows
-          if (action === 'insert') { data = [{ id: 'new-store', ...payload }]; records[table].push(...data) }
+          if (action === 'insert') {
+            data = [{ id: 'new-store', ...payload }]
+            records[table].push(...data)
+            if (table === 'stores') records.branches.push({ id: 'primary-branch', store_id: 'new-store', is_primary: true, category_id: 'comercio_general' })
+          }
           if (action === 'update') rows.forEach(r => Object.assign(r, payload))
           if (action === 'delete') records[table] = records[table].filter(r => !rows.includes(r))
           return Promise.resolve({ data, error: null, count: rows.length }).then(resolve)
@@ -177,6 +182,23 @@ describe('create-store', () => {
     expect(store?.subscription_ends_at ?? null).toBeNull()
     expect(store?.trial_ends_at).toBeUndefined()
     expect(store?.billing_cycle).toBeNull()
+  })
+  it('stores the selected category on the primary branch for a new commerce family', async () => {
+    const f = fixture({ superAdmin: true })
+    const response = await f.store({ ...newStore, familyId: 'services', categoryId: 'barberia_belleza' })
+    expect(response.status).toBe(200)
+    expect(f.records.stores.find(row => row.id === 'new-store')?.business_type).toBe('tienda_articulos')
+    expect(f.records.branches).toContainEqual(expect.objectContaining({ store_id: 'new-store', category_id: 'barberia_belleza', is_primary: true }))
+  })
+  it('keeps the invited owner email visible in the admin store directory', async () => {
+    const f = fixture({ superAdmin: true })
+    expect((await f.store(newStore)).status).toBe(200)
+    expect(f.records.users.find(row => row.id === 'new')?.email).toBe('test@example.com')
+  })
+  it('rejects a category from another family before creating an identity', async () => {
+    const f = fixture({ superAdmin: true })
+    expect((await f.store({ ...newStore, familyId: 'services', categoryId: 'cafeteria' })).status).toBe(400)
+    expect(f.authMutations).toEqual([])
   })
 
   it('handles preflight before authentication', async () => {

@@ -47,8 +47,17 @@ where id='20000000-0000-0000-0000-000000000001';
 select test.ok('owner legacy edits synchronize the primary branch',
   exists(select 1 from public.branches where store_id='20000000-0000-0000-0000-000000000001'
     and is_primary and name='A renewed' and category_id='ferreteria_construccion'));
+reset role;
+update public.branches set category_id='barberia_belleza' where store_id='20000000-0000-0000-0000-000000000001' and is_primary;
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',false);
+update public.stores set name='A renamed' where id='20000000-0000-0000-0000-000000000001';
+select test.ok('renaming a store preserves its selected branch category',
+  exists(select 1 from public.branches where store_id='20000000-0000-0000-0000-000000000001'
+    and is_primary and name='A renamed' and category_id='barberia_belleza'));
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000004',false);
 select test.ok('inactive profile cannot read branches',(select count(*)=0 from public.branches));
 reset role;
+update public.branches set category_id='ferreteria_construccion' where store_id='20000000-0000-0000-0000-000000000001' and is_primary;
 
 do $$begin if exists(select 1 from test.results where not passed) then raise exception 'primary branch regression'; end if; end $$;
