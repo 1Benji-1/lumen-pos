@@ -6,6 +6,7 @@ import { useDashboardData } from './hooks/useDashboardData'
 import { QuickAdjustmentModal } from '../inventory/components/QuickAdjustmentModal'
 import { CorteXModal } from '../pos/components/CorteXModal'
 import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
+import { FamilyDashboardPage } from './FamilyDashboardPage'
 
 function formatElapsedTime(isoString?: string): { text: string; isLongShift: boolean } {
   if (!isoString) return { text: '—', isLongShift: false }
@@ -19,7 +20,7 @@ function formatElapsedTime(isoString?: string): { text: string; isLongShift: boo
   return { text: `${hours}h ${minutes}m`, isLongShift }
 }
 
-export function DashboardPage() {
+function RetailDashboardPage() {
   const { hasPermission, loading: roleLoading } = useCurrentUserRole()
   const { storeId, storeName, canAccessModule, isLoading: modulesLoading } =
     useStoreModules()
@@ -1069,6 +1070,16 @@ export function DashboardPage() {
       )}
     </div>
   )
+}
+
+export function DashboardPage() {
+  const { profile, isLoading, error, canAccessModule } = useStoreModules()
+  if (isLoading) return <div className="max-w-7xl mx-auto p-8 text-sm text-[#5A5D5A]">Cargando inicio...</div>
+  if (error || !profile) return <div role="alert" className="max-w-7xl mx-auto p-8 text-sm text-[#BC4749]">No se pudo cargar el perfil de la tienda.</div>
+  if (profile.familyId !== 'retail' || !canAccessModule('pos') || !canAccessModule('inventory')) {
+    return <FamilyDashboardPage profile={profile} />
+  }
+  return <RetailDashboardPage />
 }
 
 export default DashboardPage
