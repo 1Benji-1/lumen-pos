@@ -35,7 +35,7 @@ begin
   for relation_name in
     select tablename from pg_tables
     where schemaname='public'
-      and tablename not in ('branches','module_catalog','module_activations','module_activation_audit')
+      and tablename not in ('branches','module_catalog','module_activations','module_activation_audit','medical_professionals')
   loop
     execute format('grant select, insert, update, delete on public.%I to anon, authenticated, service_role', relation_name);
   end loop;
@@ -55,6 +55,7 @@ sql < "$root/packages/supabase/tests/primary-branches.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/module-activations.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/module-activation-ui.sql" || test_status=$?
 sql < "$root/packages/supabase/tests/module-authorization.sql" || test_status=$?
+sql < "$root/packages/supabase/tests/medical-profile.sql" || test_status=$?
 node --experimental-strip-types "$root/scripts/module-catalog-expected.mjs" | sql || test_status=$?
 bash "$root/packages/supabase/tests/concurrency.sh" "$container" || test_status=$?
 # Regression probe: disable only the serialization trigger in this disposable DB.

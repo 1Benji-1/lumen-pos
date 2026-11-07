@@ -20,6 +20,7 @@ const permissions = {
 } as const
 
 function headingFor(profile: BusinessProfile, pos: boolean, inventory: boolean) {
+  if (profile.categoryId === 'consultorios_clinicas') return 'Gestión del consultorio'
   if (profile.familyId === 'gastronomy') return pos ? 'Ventas de gastronomía' : inventory ? 'Inventario y clientes' : 'Gestión de clientes'
   if (profile.familyId === 'services') return pos ? 'Atención y ventas' : 'Atención a clientes'
   if (profile.familyId === 'wholesale') return 'Catálogo y distribución'
@@ -27,6 +28,7 @@ function headingFor(profile: BusinessProfile, pos: boolean, inventory: boolean) 
 }
 
 function summaryFor(profile: BusinessProfile, pos: boolean, inventory: boolean) {
+  if (profile.categoryId === 'consultorios_clinicas') return 'Gestiona el equipo y los cobros disponibles. La agenda y la documentación clínica siguen en preparación.'
   if (profile.familyId === 'gastronomy') return pos
     ? 'Consulta las ventas y existencias de hoy. Pedidos, Cocina y Mesas se habilitarán cuando estén implementados.'
     : 'Controla existencias y clientes. El flujo de pedidos y cocina aún está en preparación.'

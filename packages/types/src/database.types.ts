@@ -34,6 +34,15 @@ export type Database = {
   }
   public: {
     Tables: {
+      medical_professionals: {
+        Row: { user_id: string; store_id: string; specialties: string[]; updated_at: string }
+        Insert: { user_id: string; store_id: string; specialties?: string[]; updated_at?: string }
+        Update: { user_id?: string; store_id?: string; specialties?: string[]; updated_at?: string }
+        Relationships: [
+          { foreignKeyName: "medical_professionals_user_id_fkey"; columns: ["user_id"]; isOneToOne: true; referencedRelation: "users"; referencedColumns: ["id"] },
+          { foreignKeyName: "medical_professionals_store_id_fkey"; columns: ["store_id"]; isOneToOne: false; referencedRelation: "stores"; referencedColumns: ["id"] },
+        ]
+      }
       app_feedback: {
         Row: {
           admin_notes: string | null
@@ -1300,6 +1309,10 @@ export type Database = {
       }
     }
     Functions: {
+      set_medical_specialties: {
+        Args: { p_user_id: string; p_specialties: string[] }
+        Returns: undefined
+      }
       adjust_variant_stock: {
         Args: {
           p_new_stock: number

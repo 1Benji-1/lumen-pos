@@ -62,6 +62,14 @@ it('gives service businesses their own priorities without inventing appointments
   expect(screen.queryByText('Alertas de stock')).toBeNull()
 })
 
+it('describes a medical practice without offering unfinished clinical records', () => {
+  access.familyId = 'services'; access.categoryId = 'consultorios_clinicas'; access.inventory = false
+  renderDashboard()
+  expect(screen.getByRole('heading', { name: 'Gestión del consultorio' })).toBeTruthy()
+  expect(screen.getByText(/Historia clínica · Recetas médicas · Documentos médicos/)).toBeTruthy()
+  expect(screen.queryByRole('link', { name: /Historia clínica|Recetas médicas/ })).toBeNull()
+})
+
 it('removes sales and cash from retail when POS is deactivated', () => {
   access.pos = false; access.inventory = true
   renderDashboard()

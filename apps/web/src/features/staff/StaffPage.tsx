@@ -4,12 +4,15 @@ import { useStoreId } from '../../shared/hooks/useStoreId'
 import { useStorePlan } from '../../shared/hooks/useStorePlan'
 import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
 import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
+import { useStoreModules } from '../../shared/hooks/useStoreModules'
 import { useStaff } from './hooks/useStaff'
 import { StaffTable } from './components/StaffTable'
 import { AddStaffModal } from './components/AddStaffModal'
 import { RoleMatrixModal } from './components/RoleMatrixModal'
+import { MedicalSpecialtiesSection } from './components/MedicalSpecialtiesSection'
 
 export function StaffPage() {
+  const { profile } = useStoreModules()
   const { storeId } = useStoreId()
   const { isOwner, hasPermission, email: currentUserEmail } = useCurrentUserRole()
   const {
@@ -279,6 +282,10 @@ export function StaffPage() {
           isOwner={isOwner}
           canManage={canManageStaff}
         />
+      )}
+
+      {profile?.categoryId === 'consultorios_clinicas' && storeId && !isError && (
+        <MedicalSpecialtiesSection storeId={storeId} staff={staff} isOwner={isOwner} />
       )}
 
       {/* Modales */}

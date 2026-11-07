@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BUSINESS_CATEGORIES, resolveLegacyBusinessProfile, resolveStoredBusinessProfile } from './commerce'
+import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, resolveLegacyBusinessProfile, resolveStoredBusinessProfile } from './commerce'
 import { RETAIL_SUBTYPES } from './business'
 
 describe('legacy business profile', () => {
@@ -32,6 +32,10 @@ describe('legacy business profile', () => {
 })
 
 describe('stored branch profile', () => {
+  it('places medical practices under the renamed Services family', () => {
+    expect(BUSINESS_FAMILIES.services.name).toBe('Servicios')
+    expect(resolveStoredBusinessProfile('consultorios_clinicas')).toEqual({ familyId: 'services', categoryId: 'consultorios_clinicas' })
+  })
   it('derives the family from a valid persisted category', () => {
     expect(resolveStoredBusinessProfile('dark_kitchen')).toEqual({ familyId: 'gastronomy', categoryId: 'dark_kitchen' })
   })

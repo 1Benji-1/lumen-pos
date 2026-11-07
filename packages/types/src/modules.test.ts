@@ -21,6 +21,10 @@ describe('category module composition', () => {
   it('allows taller to default to inventory and work orders', () => {
     expect(getDefaultModuleIds('taller')).toEqual(expect.arrayContaining(['inventory', 'work_orders']))
   })
+  it('exposes commercial tools for consultorios while keeping clinical tools unavailable', () => {
+    expect(getAvailableModuleDefinitions('consultorios_clinicas').map(m => m.id)).toEqual(['dashboard', 'pos', 'customers', 'staff', 'analytics', 'settings'])
+    expect(getDefaultModuleIds('consultorios_clinicas')).toEqual(expect.arrayContaining(['agenda', 'clinical_records', 'prescriptions']))
+  })
   it('never returns planned modules as available navigation modules', () => {
     expect(getAvailableModuleDefinitions('restaurante_tradicional').map(m => m.id)).not.toContain('tables')
   })

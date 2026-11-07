@@ -190,6 +190,12 @@ describe('create-store', () => {
     expect(f.records.stores.find(row => row.id === 'new-store')?.business_type).toBe('tienda_articulos')
     expect(f.records.branches).toContainEqual(expect.objectContaining({ store_id: 'new-store', category_id: 'barberia_belleza', is_primary: true }))
   })
+  it('creates a medical practice inside the services family', async () => {
+    const f = fixture({ superAdmin: true })
+    const response = await f.store({ ...newStore, familyId: 'services', categoryId: 'consultorios_clinicas' })
+    expect(response.status).toBe(200)
+    expect(f.records.branches).toContainEqual(expect.objectContaining({ category_id: 'consultorios_clinicas', is_primary: true }))
+  })
   it('keeps the invited owner email visible in the admin store directory', async () => {
     const f = fixture({ superAdmin: true })
     expect((await f.store(newStore)).status).toBe(200)

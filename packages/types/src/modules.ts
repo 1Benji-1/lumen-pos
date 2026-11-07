@@ -5,6 +5,7 @@ export type ModuleId =
   | 'cash' | 'orders' | 'purchases' | 'online_commerce' | 'delivery' | 'credit'
   | 'loyalty' | 'multi_branch' | 'integrations' | 'agenda' | 'work_orders'
   | 'kitchen' | 'recipes' | 'tables' | 'scales' | 'quotes'
+  | 'clinical_records' | 'prescriptions' | 'medical_documents'
 export type ModuleScope = 'organization' | 'branch'
 export type ModuleImplementationStatus = 'available' | 'planned'
 
@@ -47,6 +48,9 @@ export const MODULE_REGISTRY: Record<ModuleId, ModuleDefinition> = {
   tables: planned('tables', 'Mesas y comandas', 'branch'),
   scales: planned('scales', 'Balanzas', 'branch'),
   quotes: planned('quotes', 'Cotizaciones', 'branch'),
+  clinical_records: planned('clinical_records', 'Historia clínica', 'organization'),
+  prescriptions: planned('prescriptions', 'Recetas médicas', 'organization'),
+  medical_documents: planned('medical_documents', 'Documentos médicos', 'organization'),
 }
 
 const retail: ModuleId[] = ['dashboard', 'pos', 'inventory', 'customers', 'analytics', 'staff', 'settings']
@@ -74,6 +78,7 @@ export const CATEGORY_MODULE_DEFAULTS: Record<BusinessCategoryId, readonly Modul
   lavanderia: [...services, 'orders', 'cash'],
   taller: [...services, 'work_orders', 'inventory', 'purchases', 'quotes'],
   servicio_tecnico: [...services, 'work_orders', 'inventory'],
+  consultorios_clinicas: ['dashboard', 'pos', 'customers', 'staff', 'analytics', 'settings', 'agenda', 'clinical_records', 'prescriptions', 'medical_documents'],
   mayorista_general: wholesale,
   distribuidor: [...wholesale, 'delivery'],
 }

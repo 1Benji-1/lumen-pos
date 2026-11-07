@@ -4,7 +4,7 @@ export type BusinessFamilyId = 'retail' | 'gastronomy' | 'services' | 'wholesale
 export type BusinessCategoryId =
   | RetailSubType | 'repuestos' | 'tienda_mascotas'
   | 'restaurante_tradicional' | 'cafeteria' | 'bar' | 'panaderia' | 'comida_rapida' | 'dark_kitchen'
-  | 'barberia_belleza' | 'lavanderia' | 'taller' | 'servicio_tecnico'
+  | 'barberia_belleza' | 'lavanderia' | 'taller' | 'servicio_tecnico' | 'consultorios_clinicas'
   | 'mayorista_general' | 'distribuidor'
 
 export interface BusinessProfile { familyId: BusinessFamilyId; categoryId: BusinessCategoryId }
@@ -14,7 +14,7 @@ export interface BusinessCategoryDefinition { id: BusinessCategoryId; familyId: 
 export const BUSINESS_FAMILIES: Record<BusinessFamilyId, BusinessFamilyDefinition> = {
   retail: { id: 'retail', name: 'Comercio minorista' },
   gastronomy: { id: 'gastronomy', name: 'Gastronomía' },
-  services: { id: 'services', name: 'Servicios con venta' },
+  services: { id: 'services', name: 'Servicios' },
   wholesale: { id: 'wholesale', name: 'Mayoristas y distribuidores' },
 }
 
@@ -38,6 +38,7 @@ export const BUSINESS_CATEGORIES: Record<BusinessCategoryId, BusinessCategoryDef
   lavanderia: { id: 'lavanderia', familyId: 'services', name: 'Lavandería' },
   taller: { id: 'taller', familyId: 'services', name: 'Taller' },
   servicio_tecnico: { id: 'servicio_tecnico', familyId: 'services', name: 'Servicio técnico' },
+  consultorios_clinicas: { id: 'consultorios_clinicas', familyId: 'services', name: 'Consultorios y clínicas' },
   mayorista_general: { id: 'mayorista_general', familyId: 'wholesale', name: 'Mayorista general' },
   distribuidor: { id: 'distribuidor', familyId: 'wholesale', name: 'Distribuidor' },
 }

@@ -7,7 +7,7 @@ const corsHeaders = {
 const familyCategories: Record<string, readonly string[]> = {
   retail: ['comercio_general', 'minimarket_abarrotes', 'ropa_calzado', 'ferreteria_construccion', 'farmacia_belleza', 'libreria_papeleria', 'tecnologia_celulares', 'repuestos', 'tienda_mascotas'],
   gastronomy: ['restaurante_tradicional', 'cafeteria', 'bar', 'panaderia', 'comida_rapida', 'dark_kitchen'],
-  services: ['barberia_belleza', 'lavanderia', 'taller', 'servicio_tecnico'],
+  services: ['barberia_belleza', 'lavanderia', 'taller', 'servicio_tecnico', 'consultorios_clinicas'],
   wholesale: ['mayorista_general', 'distribuidor'],
 }
 
