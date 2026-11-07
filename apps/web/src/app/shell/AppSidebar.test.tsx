@@ -2,8 +2,8 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 const state = vi.hoisted(() => ({ modules: ['dashboard', 'pos', 'inventory', 'customers', 'staff', 'settings'] as string[], permissions: ['dashboard:view', 'pos:access', 'inventory:view', 'customers:view', 'staff:view', 'settings:manage'] as string[], loading: false, error: null as Error | null }))
-vi.mock('../hooks/useStoreModules', () => ({ useStoreModules: () => ({ canAccessModule: (id: string) => state.modules.includes(id), isLoading: state.loading, error: state.error }) }))
-vi.mock('../hooks/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ hasPermission: (key: string) => state.permissions.includes(key), loading: false }) }))
+vi.mock('../../shared/hooks/useStoreModules', () => ({ useStoreModules: () => ({ canAccessModule: (id: string) => state.modules.includes(id), isLoading: state.loading, error: state.error }) }))
+vi.mock('../../shared/hooks/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ hasPermission: (key: string) => state.permissions.includes(key), loading: false }) }))
 import { AppSidebar } from './AppSidebar'
 beforeEach(() => { state.modules = ['dashboard', 'pos', 'inventory', 'customers', 'staff', 'settings']; state.permissions = ['dashboard:view', 'pos:access', 'inventory:view', 'customers:view', 'staff:view', 'settings:manage']; state.loading = false; state.error = null })
 afterEach(cleanup)

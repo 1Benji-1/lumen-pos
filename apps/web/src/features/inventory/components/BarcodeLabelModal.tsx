@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BarcodeSvg } from './BarcodeSvg'
 import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
-import { PlanGuard } from '../../../shared/guards/PlanGuard'
+import { PlanGuard } from '../../../core/access/guards/PlanGuard'
 
 export interface LabelProductData {
   productName: string

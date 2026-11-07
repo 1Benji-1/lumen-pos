@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
-import { useCurrentUserRole } from '../hooks/useCurrentUserRole'
-import { useStoreModules } from '../hooks/useStoreModules'
+import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
+import { useStoreModules } from '../../shared/hooks/useStoreModules'
 import { type Permission, type ModuleId } from '@lumen-pos/types'
 
 // Íconos coherentes con trazo uniforme (strokeWidth 1.8)

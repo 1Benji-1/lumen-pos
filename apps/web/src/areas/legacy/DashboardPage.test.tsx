@@ -12,8 +12,8 @@ vi.mock('../../shared/hooks/useCurrentUserRole', () => ({ useCurrentUserRole: ()
 vi.mock('./hooks/useDashboardData', () => ({
   useDashboardData: () => ({ data: null, isLoading: false, isError: false, error: null, refetch: vi.fn(), isRefetching: false, dataUpdatedAt: null }),
 }))
-vi.mock('../inventory/components/QuickAdjustmentModal', () => ({ QuickAdjustmentModal: () => null }))
-vi.mock('../pos/components/CorteXModal', () => ({ CorteXModal: () => null }))
+vi.mock('../../features/inventory/components/QuickAdjustmentModal', () => ({ QuickAdjustmentModal: () => null }))
+vi.mock('../../features/pos/components/CorteXModal', () => ({ CorteXModal: () => null }))
 const sales = vi.hoisted(() => vi.fn(async () => ({ totalAmount: 120, transactionCount: 2, averageTicket: 60 })))
 vi.mock('./services/dashboardService', () => ({ getTodaySalesSummary: sales, getLowStockAlerts: vi.fn(async () => ({ lowStockCount: 1, outOfStockCount: 0, items: [] })) }))
 

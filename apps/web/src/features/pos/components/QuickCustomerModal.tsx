@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useCustomers, useCreateCustomer } from '../../customers/hooks/useCustomers'
+import { useCustomers, useCreateCustomer } from '../../../modules/customers'
 
 interface QuickCustomerModalProps {
   isOpen: boolean

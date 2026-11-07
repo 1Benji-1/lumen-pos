@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useCustomers } from '../../customers/hooks/useCustomers'
+import { useCustomers } from '../../../modules/customers'
 
 interface CustomerSearchModalProps {
   isOpen: boolean

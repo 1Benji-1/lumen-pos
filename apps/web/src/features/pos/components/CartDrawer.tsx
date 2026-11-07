@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CartLine } from '../hooks/useCart'
-import { useCustomers } from '../../customers/hooks/useCustomers'
+import { useCustomers } from '../../../modules/customers'
 import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
 import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
 import { QuickCustomerModal } from './QuickCustomerModal'

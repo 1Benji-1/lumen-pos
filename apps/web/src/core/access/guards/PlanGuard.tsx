@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { useStoreEntitlements } from '../hooks/useStoreEntitlements'
-import { LoadingScreen } from '../components/LoadingScreen'
-import { PlanRestrictionView } from '../components/PlanRestrictionView'
+import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
+import { LoadingScreen } from '../../../shared/components/LoadingScreen'
+import { PlanRestrictionView } from '../../../shared/components/PlanRestrictionView'
 
 export function PlanGuard({
   feature,

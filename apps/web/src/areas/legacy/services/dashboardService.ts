@@ -1,5 +1,5 @@
 import { supabase } from '../../../shared/lib/supabaseClient'
-import { getCashRegisterReport } from '../../pos/services/posService'
+import { getCashRegisterReport } from '../../../features/pos/services/posService'
 import type {
   TodaySalesSummary,
   DashboardCashRegisterStatus,

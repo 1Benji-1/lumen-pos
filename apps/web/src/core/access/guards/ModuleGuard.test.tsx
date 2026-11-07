@@ -2,7 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 const state = vi.hoisted(() => ({ reason: 'allowed', loading: false, error: null as Error | null }))
-vi.mock('../hooks/useStoreModules', () => ({ useStoreModules: () => ({ isLoading: state.loading, error: state.error, businessType: 'tienda_articulos', isModuleAllowedInBusinessType: () => state.reason !== 'category_disabled', canAccessModule: () => state.reason === 'allowed', getModuleAccess: () => ({ allowed: state.reason === 'allowed', reason: state.reason }) }) }))
+vi.mock('../../../shared/hooks/useStoreModules', () => ({ useStoreModules: () => ({ isLoading: state.loading, error: state.error, businessType: 'tienda_articulos', isModuleAllowedInBusinessType: () => state.reason !== 'category_disabled', canAccessModule: () => state.reason === 'allowed', getModuleAccess: () => ({ allowed: state.reason === 'allowed', reason: state.reason }) }) }))
 import { ModuleGuard } from './ModuleGuard'
 beforeEach(() => { state.reason = 'allowed'; state.loading = false; state.error = null })
 afterEach(cleanup)

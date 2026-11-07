@@ -2,9 +2,9 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 const state = vi.hoisted(() => ({ enabled: true, loading: false, error: null as Error | null }))
-vi.mock('../hooks/useStoreEntitlements', () => ({ useStoreEntitlements: () => ({ isFeatureEnabled: () => state.enabled, planName: 'Standard', isLoading: state.loading, error: state.error }) }))
-vi.mock('../hooks/useStoreId', () => ({ useStoreId: () => ({ storeId: 'store-1' }) }))
-vi.mock('../hooks/useStorePlan', () => ({ useStorePlan: () => ({ data: { plans: { name: 'Standard', features: { advanced_analytics: true } }, feature_overrides: {} }, isLoading: false }) }))
+vi.mock('../../../shared/hooks/useStoreEntitlements', () => ({ useStoreEntitlements: () => ({ isFeatureEnabled: () => state.enabled, planName: 'Standard', isLoading: state.loading, error: state.error }) }))
+vi.mock('../../../shared/hooks/useStoreId', () => ({ useStoreId: () => ({ storeId: 'store-1' }) }))
+vi.mock('../../../shared/hooks/useStorePlan', () => ({ useStorePlan: () => ({ data: { plans: { name: 'Standard', features: { advanced_analytics: true } }, feature_overrides: {} }, isLoading: false }) }))
 import { PlanGuard } from './PlanGuard'
 beforeEach(() => { state.enabled = true; state.loading = false; state.error = null })
 afterEach(cleanup)

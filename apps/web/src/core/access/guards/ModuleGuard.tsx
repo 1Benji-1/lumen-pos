@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { type ModuleId } from '@lumen-pos/types'
-import { useStoreModules } from '../hooks/useStoreModules'
-import { LoadingScreen } from '../components/LoadingScreen'
-import { PlanRestrictionView } from '../components/PlanRestrictionView'
+import { useStoreModules } from '../../../shared/hooks/useStoreModules'
+import { LoadingScreen } from '../../../shared/components/LoadingScreen'
+import { PlanRestrictionView } from '../../../shared/components/PlanRestrictionView'
 
 export function ModuleGuard({
   module,
