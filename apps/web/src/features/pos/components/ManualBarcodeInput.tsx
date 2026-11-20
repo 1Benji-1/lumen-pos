@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
+import { useRetailSubrubro } from '../../retail/useRetailSubrubro'
 
 export function ManualBarcodeInput({ onSubmit }: { onSubmit: (barcode: string) => void }) {
   const [value, setValue] = useState('')

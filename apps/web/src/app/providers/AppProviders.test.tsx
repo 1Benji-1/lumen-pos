@@ -7,7 +7,7 @@ vi.mock('../../shared/lib/supabaseClient', () => ({ supabase: { auth: { onAuthSt
 vi.mock('../../../../admin/src/shared/lib/supabaseClient', () => ({ supabase: { auth: { onAuthStateChange: (cb: (event: string, session: unknown) => void) => { f.callbacks.push(cb); return { data: { subscription: { unsubscribe() {} } } } } } } }))
 vi.mock('../../../../admin/src/shared/context/ToastContext', () => ({ ToastProvider: ({ children }: { children: ReactNode }) => children }))
 vi.mock('../../../../admin/src/shared/context/ThemeContext', () => ({ ThemeProvider: ({ children }: { children: ReactNode }) => children }))
-import { AppProviders as WebProviders } from '../../app/providers/AppProviders'
+import { AppProviders as WebProviders } from './AppProviders'
 import { AppProviders as AdminProviders } from '../../../../admin/src/app/providers/AppProviders'
 
 it.each([['web', WebProviders], ['admin', AdminProviders]] as const)('%s clears cached tenant queries on account changes', (_name, Providers) => {

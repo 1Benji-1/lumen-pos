@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarcodeSvg } from './BarcodeSvg'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 import { PlanGuard } from '../../../core/access/guards/PlanGuard'
 
 export interface LabelProductData {
@@ -20,7 +20,7 @@ export function BarcodeLabelModal({
   onClose: () => void
 }) {
   const [quantity, setQuantity] = useState(1)
-  const { settings } = useStoreSettings()
+  const { settings } = useOrganizationSettings()
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

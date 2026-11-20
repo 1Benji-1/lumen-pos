@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface InventoryLabelsSectionProps {
   settings?: StoreSettings
 }
 
 export function InventoryLabelsSection({ settings }: InventoryLabelsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [barcodeLabelSize, setBarcodeLabelSize] = useState<'50x30' | '40x25'>('50x30')
   const [barcodeLabelShowPrice, setBarcodeLabelShowPrice] = useState(true)

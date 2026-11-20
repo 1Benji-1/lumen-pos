@@ -18,7 +18,7 @@ export function formatAuthError(err: unknown): string {
     return 'Demasiados intentos seguidos. Por seguridad, espere unos momentos antes de reintentar.'
   }
   if (lower.includes('failed to fetch') || lower.includes('network') || lower.includes('connection')) {
-    return 'No se pudo conectar con el servidor. Verifique la conexión a internet de la tienda.'
+    return 'No se pudo conectar con el servidor. Verifique la conexión a internet de la organización.'
   }
   if (lower.includes('password should be at least') || lower.includes('weak_password')) {
     return 'La contraseña debe tener al menos 6 caracteres.'

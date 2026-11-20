@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface RegionalSettingsSectionProps {
   settings?: StoreSettings
@@ -25,7 +25,7 @@ const QUICK_CURRENCIES = [
 ]
 
 export function RegionalSettingsSection({ settings }: RegionalSettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [currencySymbol, setCurrencySymbol] = useState('Bs')
   const [currencyCode, setCurrencyCode] = useState('BOB')

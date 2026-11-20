@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface InventoryStockSectionProps {
   settings?: StoreSettings
@@ -16,7 +16,7 @@ const COMMON_UNITS = [
 ]
 
 export function InventoryStockSection({ settings }: InventoryStockSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [defaultLowStockThreshold, setDefaultLowStockThreshold] = useState<number | ''>(5)
   const [defaultProductUnit, setDefaultProductUnit] = useState('u')

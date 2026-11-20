@@ -1,7 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { useCallback, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../../features/auth/hooks/useAuth'
+import { supabase } from '../../shared/lib/supabaseClient'
+import { useAuth } from '../auth/hooks/useAuth'
 import { type UserRole, type Permission, hasPermission as checkRolePermission, ROLE_DEFINITIONS } from '@lumen-pos/types'
 
 export interface UserRoleState {

@@ -3,9 +3,9 @@ import { useCategories, useCreateCategory } from '../hooks/useCategories'
 import { useSuppliers } from '../hooks/useSuppliers'
 import { useCreateProduct } from '../hooks/useProducts'
 import { generateInternalBarcode } from '../utils/barcodeGenerator'
-import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
+import { useRetailSubrubro } from '../../retail/useRetailSubrubro'
 import { PRODUCT_UNITS, type ProductUnit } from '@lumen-pos/types'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface CreateProductModalProps {
   isOpen: boolean
@@ -23,7 +23,7 @@ export function CreateProductModal({
   const { config } = useRetailSubrubro()
   const { data: categories } = useCategories(storeId)
   const { data: suppliers } = useSuppliers(storeId)
-  const { settings } = useStoreSettings(storeId)
+  const { settings } = useOrganizationSettings(storeId)
   const createProduct = useCreateProduct(storeId)
   const createCategory = useCreateCategory(storeId)
 

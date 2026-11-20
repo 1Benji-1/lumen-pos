@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import { ProductTable } from './components/ProductTable'
 import { InventoryDrawer } from './components/InventoryDrawer'
 import { CreateProductModal } from './components/CreateProductModal'
@@ -9,7 +9,7 @@ import { InventoryNavTabs } from './components/InventoryNavTabs'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 
 export function InventoryPage() {
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false)
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false)

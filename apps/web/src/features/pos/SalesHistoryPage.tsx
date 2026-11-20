@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import { useSales, useRefundSale, useSendDigitalReceipt, useActiveCashRegisters } from './hooks/useSales'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
 import { PosNavTabs } from './components/PosNavTabs'
 import { StickyTableWrapper } from '../../shared/components/StickyTableWrapper'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
@@ -14,7 +14,7 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 export function SalesHistoryPage() {
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const { hasPermission, role, loading: roleLoading } = useCurrentUserRole()
 
   const [statusFilter, setStatusFilter] = useState<string>('all')

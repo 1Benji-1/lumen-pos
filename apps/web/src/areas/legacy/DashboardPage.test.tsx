@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DashboardPage } from './DashboardPage'
 
 const access = vi.hoisted(() => ({ inventory: false, analytics: false, pos: true, familyId: 'retail', categoryId: 'comercio_general' }))
-vi.mock('../../shared/hooks/useStoreModules', () => ({
-  useStoreModules: () => ({ storeId: 'store-a', storeName: 'Tienda de prueba', profile: { familyId: access.familyId, categoryId: access.categoryId }, isLoading: false, canAccessModule: (id: string) => id === 'inventory' ? access.inventory : id === 'analytics' ? access.analytics : id === 'pos' ? access.pos : true }),
+vi.mock('../../core/access/useOrganizationModules', () => ({
+  useOrganizationModules: () => ({ organizationId: 'store-a', organizationName: 'Tienda de prueba', profile: { familyId: access.familyId, categoryId: access.categoryId }, isLoading: false, canAccessModule: (id: string) => id === 'inventory' ? access.inventory : id === 'analytics' ? access.analytics : id === 'pos' ? access.pos : true }),
 }))
-vi.mock('../../shared/hooks/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ loading: false, hasPermission: () => true }) }))
+vi.mock('../../core/users/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ loading: false, hasPermission: () => true }) }))
 vi.mock('./hooks/useDashboardData', () => ({
   useDashboardData: () => ({ data: null, isLoading: false, isError: false, error: null, refetch: vi.fn(), isRefetching: false, dataUpdatedAt: null }),
 }))

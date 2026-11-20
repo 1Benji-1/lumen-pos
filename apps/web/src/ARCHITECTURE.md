@@ -18,6 +18,8 @@ core → shared
 shared → utilidades externas y tipos
 ```
 
-Durante la migración, `areas/legacy` conserva el dashboard actual, que atiende varias familias, y sus importaciones hacia `features/pos` y `features/inventory`. `core/access` utiliza hooks existentes en `shared` que todavía dependen de `features`. Estos enlaces son deuda de transición, no el patrón para código nuevo. Los dashboards específicos y la neutralización de los hooks se harán en fases posteriores.
+El núcleo de Web agrupa sesión, usuarios y roles, organización, suscripción, configuración y acceso. `useOrganizationId` identifica la organización de la cuenta autenticada. Los hooks de suscripción y el repositorio de configuración traducen desde las tablas actuales de Supabase. Los identificadores y filtros SQL conservan el formato usado por los datos existentes.
 
-Las rutas públicas y los contratos SQL no se renombran en la fase 1. `apps/admin` queda fuera de la reestructuración.
+El acceso de Web todavía resuelve el perfil de negocio y las activaciones con la sucursal primaria. Las lecturas correspondientes están en `core/access/legacy`. La transición hacia acceso por áreas pertenece a la fase 3.
+
+`areas/legacy` conserva el dashboard de varias familias y sus dependencias de ventas e inventario. Los preajustes de subrubro siguen en `features/retail`.

@@ -13,8 +13,8 @@ import { EditProductModal } from './EditProductModal'
 import { QuickAdjustmentModal } from './QuickAdjustmentModal'
 import { generateInternalBarcode } from '../utils/barcodeGenerator'
 import { PRODUCT_UNITS } from '@lumen-pos/types'
-import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
+import { useOrganizationEntitlements } from '../../../core/subscriptions/useOrganizationEntitlements'
+import { useCurrentUserRole } from '../../../core/users/useCurrentUserRole'
 import { StickyTableWrapper } from '../../../shared/components/StickyTableWrapper'
 
 type ActiveFilter = 'active' | 'inactive' | 'all' | 'low_stock'
@@ -46,7 +46,7 @@ export function ProductTable({ storeId }: { storeId: string }) {
   const [adjustingVariantId, setAdjustingVariantId] = useState<string | null>(null)
 
   const { data: categories } = useCategories(storeId)
-  const { isFeatureEnabled } = useStoreEntitlements()
+  const { isFeatureEnabled } = useOrganizationEntitlements()
   const allowBarcodeLabels = isFeatureEnabled('barcode_labels')
 
   useEffect(() => {

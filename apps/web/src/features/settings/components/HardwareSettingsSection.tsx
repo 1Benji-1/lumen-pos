@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface HardwareSettingsSectionProps {
   settings?: StoreSettings
@@ -25,7 +25,7 @@ const QUICK_CURRENCIES = [
 ]
 
 export function HardwareSettingsSection({ settings }: HardwareSettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   // Etiquetas de códigos de barras
   const [barcodeLabelSize, setBarcodeLabelSize] = useState<'50x30' | '40x25'>('50x30')

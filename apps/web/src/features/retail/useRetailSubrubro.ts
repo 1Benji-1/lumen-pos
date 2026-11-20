@@ -1,5 +1,5 @@
-import { useStoreId } from './useStoreId'
-import { useStorePlan } from './useStorePlan'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationPlan } from '../../core/subscriptions/useOrganizationPlan'
 import { resolveLegacyBusinessProfile } from '@lumen-pos/types'
 import {
   getRetailSubrubroConfig,
@@ -12,12 +12,12 @@ export function useRetailSubrubro(): {
   config: RetailSubrubroConfig
   isLoading: boolean
 } {
-  const { storeId, loading: storeIdLoading } = useStoreId()
-  const { data: store, isLoading: storeLoading } = useStorePlan(storeId)
+  const { organizationId: storeId, loading: storeIdLoading } = useOrganizationId()
+  const { data: store, isLoading: storeLoading } = useOrganizationPlan(storeId)
 
-  const profile = resolveLegacyBusinessProfile(store?.business_type, store?.industry_sub_type)
+  const profile = resolveLegacyBusinessProfile(store?.businessType, store?.industrySubType)
   const config = getRetailSubrubroConfig(
-    profile.familyId === 'retail' && store?.business_type === 'tienda_articulos'
+    profile.familyId === 'retail' && store?.businessType === 'tienda_articulos'
       ? profile.categoryId
       : 'comercio_general',
   )

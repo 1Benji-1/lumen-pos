@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
-import { useStorePlan } from '../../shared/hooks/useStorePlan'
-import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
-import { useAuth } from '../auth/hooks/useAuth'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationPlan } from '../../core/subscriptions/useOrganizationPlan'
+import { useOrganizationEntitlements } from '../../core/subscriptions/useOrganizationEntitlements'
+import { useAuth } from '../../core/auth/hooks/useAuth'
 import { useProducts } from '../inventory/hooks/useProducts'
 import { useOpenCashRegister } from './hooks/useCashRegister'
 import { useCart } from './hooks/useCart'
@@ -25,7 +25,7 @@ import { TicketModal } from './components/TicketModal'
 import { PosNavTabs } from './components/PosNavTabs'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 import type { PaymentMethod, PaymentSplitItem, OfflineSalePayload } from '@lumen-pos/types'
-import { useStoreSettings } from '../settings/hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../core/configuration/useOrganizationSettings'
 import { PosToastProvider, usePosToast } from './context/PosToastContext'
 
 type CompletedSale = {
@@ -41,10 +41,10 @@ type CompletedSale = {
 
 function PosPageContent() {
   const { toast } = usePosToast()
-  const { storeId, loading: storeLoading } = useStoreId()
-  const { settings } = useStoreSettings(storeId)
-  const { data: storePlan, isLoading: planLoading } = useStorePlan(storeId)
-  const { isFeatureEnabled } = useStoreEntitlements()
+  const { organizationId: storeId, loading: storeLoading } = useOrganizationId()
+  const { settings } = useOrganizationSettings(storeId)
+  const { data: storePlan, isLoading: planLoading } = useOrganizationPlan(storeId)
+  const { isFeatureEnabled } = useOrganizationEntitlements()
   const { session } = useAuth()
   const isOnline = useOnlineStatus()
 

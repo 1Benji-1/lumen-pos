@@ -72,11 +72,11 @@
     "web/src/features/staff/components/EditRoleModal.tsx:react-hooks/set-state-in-effect:2": 1,
     "web/src/features/staff/components/StaffTable.tsx:@typescript-eslint/no-explicit-any:2": 1,
     "web/src/features/staff/StaffPage.tsx:@typescript-eslint/no-explicit-any:2": 5,
-    "web/src/shared/components/FeedbackPopover.tsx:react-hooks/set-state-in-effect:2": 1,
+    "web/src/app/shell/FeedbackPopover.tsx:react-hooks/set-state-in-effect:2": 1,
     "web/src/app/shell/NavigationHeader.tsx:@typescript-eslint/no-explicit-any:2": 1,
     "web/src/app/shell/NavigationHeader.tsx:react-hooks/exhaustive-deps:1": 1,
     "web/src/app/shell/NavigationHeader.tsx:react-hooks/set-state-in-effect:2": 1,
     "web/src/core/access/guards/PlanGuard.tsx:@typescript-eslint/no-explicit-any:2": 2,
-    "web/src/shared/hooks/useStoreModules.ts:@typescript-eslint/no-explicit-any:2": 2
+    "web/src/core/access/useOrganizationModules.ts:@typescript-eslint/no-explicit-any:2": 2
   }
 }

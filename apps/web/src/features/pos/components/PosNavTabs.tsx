@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
+import { useCurrentUserRole } from '../../../core/users/useCurrentUserRole'
 
 interface PosTabItem {
   path: string

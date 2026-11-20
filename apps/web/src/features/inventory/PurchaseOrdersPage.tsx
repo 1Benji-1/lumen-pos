@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import {
   usePurchaseOrders,
   useCreatePurchaseOrder,
@@ -12,7 +12,7 @@ import { InventoryDrawer } from './components/InventoryDrawer'
 import { InventoryNavTabs } from './components/InventoryNavTabs'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 import { StickyTableWrapper } from '../../shared/components/StickyTableWrapper'
-import { useStoreSettings } from '../settings/hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../core/configuration/useOrganizationSettings'
 import { getDateRangeForPeriod } from '../analytics/utils/dateRanges'
 import {
   type PurchaseOrder,
@@ -60,8 +60,8 @@ function getStatusLabel(st: string): string {
 }
 
 export function PurchaseOrdersPage() {
-  const { storeId, loading } = useStoreId()
-  const { data: settings } = useStoreSettings(storeId)
+  const { organizationId: storeId, loading } = useOrganizationId()
+  const { data: settings } = useOrganizationSettings(storeId)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { data: orders, isLoading } = usePurchaseOrders(storeId)
   const { data: suppliers } = useSuppliers(storeId)

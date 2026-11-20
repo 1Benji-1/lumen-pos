@@ -1,25 +1,25 @@
 import { useState } from 'react'
-import { useStoreId } from '../../../shared/hooks/useStoreId'
-import { useStorePlan } from '../../../shared/hooks/useStorePlan'
-import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
-import { useStoreModules } from '../../../shared/hooks/useStoreModules'
+import { useOrganizationId } from '../../../core/organizations/useOrganizationId'
+import { useOrganizationPlan } from '../../../core/subscriptions/useOrganizationPlan'
+import { useOrganizationEntitlements } from '../../../core/subscriptions/useOrganizationEntitlements'
+import { useOrganizationModules } from '../../../core/access/useOrganizationModules'
 import { useStaff } from '../../staff/hooks/useStaff'
 import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, PLAN_DEFAULT_LIMITS, SYSTEM_FEATURES, type PlanCode } from '@lumen-pos/types'
 
 export function PlanLimitsSection() {
-  const { storeId } = useStoreId()
-  const { data: storePlan, isLoading: planLoading } = useStorePlan(storeId)
-  const { isFeatureEnabled, getLimit } = useStoreEntitlements()
-  const { profile, isLoading: modulesLoading } = useStoreModules()
+  const { organizationId: storeId } = useOrganizationId()
+  const { data: storePlan, isLoading: planLoading } = useOrganizationPlan(storeId)
+  const { isFeatureEnabled, getLimit } = useOrganizationEntitlements()
+  const { profile, isLoading: modulesLoading } = useOrganizationModules()
   const { data: staff, isLoading: staffLoading } = useStaff(storeId)
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<PlanCode | null>(null)
   const [upgradeSubmitted, setUpgradeSubmitted] = useState(false)
 
-  const planCode = (storePlan?.plans?.code as PlanCode) || 'standard'
-  const planName = storePlan?.plans?.name || 'Estándar'
-  const status = storePlan?.subscription_status || 'active'
+  const planCode = (storePlan?.plan?.code as PlanCode) || 'standard'
+  const planName = storePlan?.plan?.name || 'Estándar'
+  const status = storePlan?.subscriptionStatus || 'active'
 
   const isTopTier = planCode === 'enterprise'
 
@@ -60,7 +60,7 @@ export function PlanLimitsSection() {
       {/* 1. Tarjeta: Suscripción actual */}
       <div>
         <h2 className="text-base font-semibold text-[#242423] mb-3">
-          Suscripción de la tienda
+          Suscripción de la organización
         </h2>
         <div className="bg-white rounded-lg border border-[#CFDBD5] shadow-xs overflow-hidden divide-y divide-[#CFDBD5]">
           {/* Plan activo y estado */}
@@ -70,7 +70,7 @@ export function PlanLimitsSection() {
                 Plan contratado
               </span>
               <span className="text-xs text-[#5A5D5A] block mt-0.5">
-                Nivel de suscripción actual y estado del servicio en esta tienda.
+                Nivel de suscripción actual y estado del servicio en esta organización.
               </span>
             </div>
             <div className="w-full sm:w-80 shrink-0 flex items-center justify-between sm:justify-end gap-3">
@@ -202,7 +202,7 @@ export function PlanLimitsSection() {
         <div className="bg-[#EFF5EE] border border-[#588157]/30 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <span className="text-xs font-bold text-[#242423] block">
-              Tu tienda cuenta con el plan más completo de la plataforma
+              Tu organización cuenta con el plan más completo de la plataforma
             </span>
             <span className="text-xs text-[#5A5D5A] block mt-0.5">
               Tienes acceso total a todas las herramientas avanzadas, colaboradores ilimitados y puntos de cobro sin restricciones.
@@ -268,7 +268,7 @@ export function PlanLimitsSection() {
               Solicitar ampliación a Plan {selectedUpgradePlan === 'enterprise' ? 'Empresa' : 'Pro'}
             </h3>
             <p className="text-xs text-[#5A5D5A]">
-              Se enviará una solicitud directa a administración para actualizar tu tienda a{' '}
+              Se enviará una solicitud directa a administración para actualizar tu organización a{' '}
               <strong>Plan {selectedUpgradePlan === 'enterprise' ? 'Empresa' : 'Pro'}</strong> y habilitar los límites superiores inmediatamente.
             </p>
 

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface GeneralSettingsSectionProps {
   settings?: StoreSettings
 }
 
 export function GeneralSettingsSection({ settings }: GeneralSettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [commercialName, setCommercialName] = useState('')
   const [legalName, setLegalName] = useState('')

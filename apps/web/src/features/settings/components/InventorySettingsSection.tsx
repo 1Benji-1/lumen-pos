@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface InventorySettingsSectionProps {
   settings?: StoreSettings
@@ -16,7 +16,7 @@ const COMMON_UNITS = [
 ]
 
 export function InventorySettingsSection({ settings }: InventorySettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   // Existencias y reposición
   const [defaultLowStockThreshold, setDefaultLowStockThreshold] = useState<number | ''>(5)

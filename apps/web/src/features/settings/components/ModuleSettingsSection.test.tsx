@@ -9,9 +9,9 @@ const fixture = vi.hoisted(() => ({
   rows: [] as { module_id: string; branch_id: string | null; enabled: boolean }[] | undefined,
   rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
 }))
-vi.mock('../../../shared/hooks/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ role: fixture.role, isOwner: fixture.role === 'owner' }) }))
-vi.mock('../../../shared/hooks/useStoreModules', () => ({ useStoreModules: () => ({ storeId: 'store-a', branchId: 'branch-a', profile: { familyId: 'retail', categoryId: 'comercio_general' }, isLoading: false, error: fixture.error, getModuleAccess: (id: string) => ({ allowed: id !== 'analytics', reason: id === 'analytics' ? 'plan_disabled' : 'allowed' }) }) }))
-vi.mock('../../../shared/hooks/useModuleActivations', () => ({ useModuleActivations: () => ({ data: fixture.rows, isLoading: false, error: null }) }))
+vi.mock('../../../core/users/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ role: fixture.role, isOwner: fixture.role === 'owner' }) }))
+vi.mock('../../../core/access/useOrganizationModules', () => ({ useOrganizationModules: () => ({ organizationId: 'store-a', branchId: 'branch-a', profile: { familyId: 'retail', categoryId: 'comercio_general' }, isLoading: false, error: fixture.error, getModuleAccess: (id: string) => ({ allowed: id !== 'analytics', reason: id === 'analytics' ? 'plan_disabled' : 'allowed' }) }) }))
+vi.mock('../../../core/access/legacy/useModuleActivations', () => ({ useModuleActivations: () => ({ data: fixture.rows, isLoading: false, error: null }) }))
 vi.mock('../../../shared/lib/supabaseClient', () => ({ supabase: { rpc: fixture.rpc } }))
 
 beforeEach(() => { fixture.role = 'owner'; fixture.error = null; fixture.rows = []; fixture.rpc.mockReset().mockResolvedValue({ data: null, error: null }) })

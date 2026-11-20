@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useStoreId } from '../hooks/useStoreId'
-import { useStoreModules } from '../hooks/useStoreModules'
-import { useCurrentUserRole } from '../hooks/useCurrentUserRole'
-import { useSubmitFeedback } from '../hooks/useFeedback'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
+import { useSubmitFeedback } from '../../shared/hooks/useFeedback'
 
 type FeedbackView = 'select' | 'issue_hub' | 'issue_form' | 'idea_form' | 'troubleshoot' | 'success'
 
@@ -19,8 +19,8 @@ export function FeedbackPopover({ isOpen, onClose }: FeedbackPopoverProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const location = useLocation()
-  const { storeId } = useStoreId()
-  const { storeName } = useStoreModules()
+  const { organizationId } = useOrganizationId()
+  const { organizationName } = useOrganizationModules()
   const { role, email } = useCurrentUserRole()
   const submitFeedback = useSubmitFeedback()
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -63,14 +63,14 @@ export function FeedbackPopover({ isOpen, onClose }: FeedbackPopoverProps) {
 
     try {
       await submitFeedback.mutateAsync({
-        store_id: storeId,
+        store_id: organizationId,
         type,
         title: title.trim(),
         description: description.trim(),
         page_url: location.pathname,
         user_email: email,
         user_role: role,
-        store_name: storeName,
+        store_name: organizationName,
       })
       setView('success')
       setTimeout(() => {
@@ -129,7 +129,7 @@ export function FeedbackPopover({ isOpen, onClose }: FeedbackPopoverProps) {
                   Problema
                 </span>
                 <span className="text-[10px] text-[#5A5D5A] block mt-0.5 leading-tight">
-                  Con mi sistema o tienda
+                  Con el sistema
                 </span>
               </div>
             </button>
@@ -392,7 +392,7 @@ export function FeedbackPopover({ isOpen, onClose }: FeedbackPopoverProps) {
             <div className="text-[11px] text-[#5A5D5A] bg-[#E8EDDF]/40 p-2.5 rounded border border-[#CFDBD5]/60">
               <span>Se adjuntará automáticamente tu pantalla actual (</span>
               <span className="font-mono text-[#242423]">{location.pathname}</span>
-              <span>) y tienda asociada.</span>
+              <span>) y la organización asociada.</span>
             </div>
 
             {errorMsg && (
@@ -474,7 +474,7 @@ export function FeedbackPopover({ isOpen, onClose }: FeedbackPopoverProps) {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe cómo funcionaría y qué beneficio le aportaría a tu comercio..."
+                placeholder="Describe cómo funcionaría y qué beneficio le aportaría a tu organización..."
                 className="w-full px-3 py-2 text-xs bg-white border border-[#CFDBD5] rounded-md text-[#242423] focus:outline-none focus:ring-1 focus:ring-[#242423] focus:border-[#242423] resize-none"
               />
             </div>

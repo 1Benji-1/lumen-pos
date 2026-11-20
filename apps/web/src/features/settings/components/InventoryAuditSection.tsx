@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface InventoryAuditSectionProps {
   settings?: StoreSettings
 }
 
 export function InventoryAuditSection({ settings }: InventoryAuditSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [expiryAlertDays, setExpiryAlertDays] = useState<number | ''>(30)
   const [blindPhysicalCount, setBlindPhysicalCount] = useState(false)

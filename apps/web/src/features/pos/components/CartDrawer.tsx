@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { CartLine } from '../hooks/useCart'
 import { useCustomers } from '../../../modules/customers'
-import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
+import { useRetailSubrubro } from '../../retail/useRetailSubrubro'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 import { QuickCustomerModal } from './QuickCustomerModal'
 import { CustomerSearchModal } from './CustomerSearchModal'
 import { usePosToast } from '../context/PosToastContext'
@@ -43,7 +43,7 @@ export function CartDrawer({
   onOpenCheckout,
 }: CartDrawerProps) {
   const { config } = useRetailSubrubro()
-  const { settings } = useStoreSettings(storeId)
+  const { settings } = useOrganizationSettings(storeId)
   const currency = settings?.currency_symbol || 'Bs'
   const { toast } = usePosToast()
 

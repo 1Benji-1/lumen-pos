@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface TicketSettingsSectionProps {
   settings?: StoreSettings
 }
 
 export function TicketSettingsSection({ settings }: TicketSettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [ticketHeader, setTicketHeader] = useState('')
   const [ticketFooter, setTicketFooter] = useState('')

@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import { VariantForm } from './components/VariantForm'
 import { InventoryDrawer } from './components/InventoryDrawer'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 
 export function AddProductPage() {
   const navigate = useNavigate()
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   if (loading) return <LoadingScreen message="Cargando formulario de producto..." />

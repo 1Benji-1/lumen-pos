@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, getDefaultModuleIds, MODULE_REGISTRY, type ModuleId } from '@lumen-pos/types'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
-import { useModuleActivations } from '../../../shared/hooks/useModuleActivations'
-import { useStoreModules } from '../../../shared/hooks/useStoreModules'
+import { useCurrentUserRole } from '../../../core/users/useCurrentUserRole'
+import { useModuleActivations } from '../../../core/access/legacy/useModuleActivations'
+import { useOrganizationModules } from '../../../core/access/useOrganizationModules'
 import { supabase } from '../../../shared/lib/supabaseClient'
 
 export function ModuleSettingsSection() {
-  const { storeId, branchId, profile, isLoading, error, getModuleAccess } = useStoreModules()
+  const { organizationId: storeId, branchId, profile, isLoading, error, getModuleAccess } = useOrganizationModules()
   const { data: rows } = useModuleActivations(storeId, branchId)
   const { isOwner } = useCurrentUserRole()
   const queryClient = useQueryClient()
@@ -16,7 +16,7 @@ export function ModuleSettingsSection() {
   const [message, setMessage] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
-  if (isLoading) return <p className="text-sm text-[#5A5D5A]">Cargando módulos de la tienda...</p>
+  if (isLoading) return <p className="text-sm text-[#5A5D5A]">Cargando módulos de la organización...</p>
   if (error || !storeId || !branchId || !profile || !rows) return <p role="alert" className="text-sm text-[#BC4749]">No se pudieron cargar los módulos. Revisa la conexión e inténtalo de nuevo.</p>
 
   const defaults = getDefaultModuleIds(profile.categoryId)

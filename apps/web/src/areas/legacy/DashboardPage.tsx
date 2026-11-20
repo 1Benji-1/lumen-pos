@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { type TopProductsPeriod } from '@lumen-pos/types'
-import { useStoreModules } from '../../shared/hooks/useStoreModules'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
 import { useDashboardData } from './hooks/useDashboardData'
 import { QuickAdjustmentModal } from '../../features/inventory/components/QuickAdjustmentModal'
 import { CorteXModal } from '../../features/pos/components/CorteXModal'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
 import { FamilyDashboardPage } from './FamilyDashboardPage'
 
 function formatElapsedTime(isoString?: string): { text: string; isLongShift: boolean } {
@@ -22,8 +22,8 @@ function formatElapsedTime(isoString?: string): { text: string; isLongShift: boo
 
 function RetailDashboardPage() {
   const { hasPermission, loading: roleLoading } = useCurrentUserRole()
-  const { storeId, storeName, canAccessModule, isLoading: modulesLoading } =
-    useStoreModules()
+  const { organizationId: storeId, organizationName: storeName, canAccessModule, isLoading: modulesLoading } =
+    useOrganizationModules()
   const showInventory = canAccessModule('inventory')
   const showAnalytics = canAccessModule('analytics')
 
@@ -1073,9 +1073,9 @@ function RetailDashboardPage() {
 }
 
 export function DashboardPage() {
-  const { profile, isLoading, error, canAccessModule } = useStoreModules()
+  const { profile, isLoading, error, canAccessModule } = useOrganizationModules()
   if (isLoading) return <div className="max-w-7xl mx-auto p-8 text-sm text-[#5A5D5A]">Cargando inicio...</div>
-  if (error || !profile) return <div role="alert" className="max-w-7xl mx-auto p-8 text-sm text-[#BC4749]">No se pudo cargar el perfil de la tienda.</div>
+  if (error || !profile) return <div role="alert" className="max-w-7xl mx-auto p-8 text-sm text-[#BC4749]">No se pudo cargar el perfil de la organización.</div>
   if (profile.familyId !== 'retail' || !canAccessModule('pos') || !canAccessModule('inventory')) {
     return <FamilyDashboardPage profile={profile} />
   }

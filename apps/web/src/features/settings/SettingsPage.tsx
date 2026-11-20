@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { SettingsSidebar, type SettingsSectionId } from './components/SettingsSidebar'
-import { useStoreSettings } from './hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../core/configuration/useOrganizationSettings'
 import { GeneralSettingsSection } from './components/GeneralSettingsSection'
 import { TicketSettingsSection } from './components/TicketSettingsSection'
 import { RegionalSettingsSection } from './components/RegionalSettingsSection'
@@ -23,7 +23,7 @@ const SECTION_HEADERS: Record<SettingsSectionId, { title: string; subtitle: stri
   },
   regional: {
     title: 'Moneda y Horarios',
-    subtitle: 'Divisa principal, símbolo comercial y zona horaria local de la tienda.',
+    subtitle: 'Divisa principal, símbolo comercial y zona horaria local de la organización.',
   },
   pos: {
     title: 'Punto de Venta (POS)',
@@ -46,18 +46,18 @@ const SECTION_HEADERS: Record<SettingsSectionId, { title: string; subtitle: stri
     subtitle: 'Alertas tempranas de vencimiento, conteo a ciegas y correlativos de compra.',
   },
   plan_limits: {
-    title: 'Plan y Límites de la Tienda',
+    title: 'Plan y Límites de la Organización',
     subtitle: 'Nivel de suscripción actual, consumo de colaboradores y opciones de ampliación.',
   },
   modules: {
-    title: 'Módulos de la tienda',
+    title: 'Módulos de la organización',
     subtitle: 'Categoría, disponibilidad y activación de herramientas para la sucursal principal.',
   },
 }
 
 export function SettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSectionId>('general')
-  const { settings, isLoading } = useStoreSettings()
+  const { settings, isLoading } = useOrganizationSettings()
 
   const currentHeader = SECTION_HEADERS[activeSection]
 
@@ -85,7 +85,7 @@ export function SettingsPage() {
           {/* Contenido de la sección seleccionada */}
           {isLoading && activeSection !== 'plan_limits' ? (
             <div className="py-12 text-center text-xs text-[#5A5D5A]">
-              Cargando ajustes de la tienda...
+              Cargando ajustes de la organización...
             </div>
           ) : (
             <>

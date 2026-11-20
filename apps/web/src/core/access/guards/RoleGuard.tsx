@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { type UserRole, type Permission, getDefaultRouteForRole } from '@lumen-pos/types'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
+import { useCurrentUserRole } from '../../users/useCurrentUserRole'
 
 import { LoadingScreen } from '../../../shared/components/LoadingScreen'
 

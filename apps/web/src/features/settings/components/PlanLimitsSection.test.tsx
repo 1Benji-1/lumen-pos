@@ -2,10 +2,10 @@ import { expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PlanLimitsSection } from './PlanLimitsSection'
 
-vi.mock('../../../shared/hooks/useStoreId', () => ({ useStoreId: () => ({ storeId: 'store-a' }) }))
-vi.mock('../../../shared/hooks/useStorePlan', () => ({ useStorePlan: () => ({ data: { industry_sub_type: 'comercio_general', subscription_status: 'trialing', plans: { code: 'standard', name: 'Standard' } }, isLoading: false }) }))
-vi.mock('../../../shared/hooks/useStoreEntitlements', () => ({ useStoreEntitlements: () => ({ isFeatureEnabled: () => false, getLimit: () => null }) }))
-vi.mock('../../../shared/hooks/useStoreModules', () => ({ useStoreModules: () => ({ profile: { familyId: 'services', categoryId: 'barberia_belleza' } }) }))
+vi.mock('../../../core/organizations/useOrganizationId', () => ({ useOrganizationId: () => ({ organizationId: 'store-a' }) }))
+vi.mock('../../../core/subscriptions/useOrganizationPlan', () => ({ useOrganizationPlan: () => ({ data: { industrySubType: 'comercio_general', subscriptionStatus: 'trialing', plan: { code: 'standard', name: 'Standard' } }, isLoading: false }) }))
+vi.mock('../../../core/subscriptions/useOrganizationEntitlements', () => ({ useOrganizationEntitlements: () => ({ isFeatureEnabled: () => false, getLimit: () => null }) }))
+vi.mock('../../../core/access/useOrganizationModules', () => ({ useOrganizationModules: () => ({ profile: { familyId: 'services', categoryId: 'barberia_belleza' } }) }))
 vi.mock('../../staff/hooks/useStaff', () => ({ useStaff: () => ({ data: [], isLoading: false }) }))
 
 it('shows the primary branch category instead of the legacy retail subtype', () => {

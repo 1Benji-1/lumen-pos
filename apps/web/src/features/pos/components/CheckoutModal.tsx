@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import type { CartLine } from '../hooks/useCart'
 import type { PaymentMethod, PaymentSplitItem } from '@lumen-pos/types'
 import { PAYMENT_METHODS } from '@lumen-pos/types'
-import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
-import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
+import { useRetailSubrubro } from '../../retail/useRetailSubrubro'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
+import { useOrganizationEntitlements } from '../../../core/subscriptions/useOrganizationEntitlements'
 import { usePosToast } from '../context/PosToastContext'
 
 interface CheckoutModalProps {
@@ -42,8 +42,8 @@ export function CheckoutModal({
   isSaving,
 }: CheckoutModalProps) {
   const { config } = useRetailSubrubro()
-  const { settings } = useStoreSettings(storeId)
-  const { isFeatureEnabled } = useStoreEntitlements()
+  const { settings } = useOrganizationSettings(storeId)
+  const { isFeatureEnabled } = useOrganizationEntitlements()
   const allowSplitPayment = isFeatureEnabled('split_payments')
 
   const currency = settings?.currency_symbol || 'Bs'

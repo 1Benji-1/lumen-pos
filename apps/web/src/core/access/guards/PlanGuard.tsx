@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
+import { useOrganizationEntitlements } from '../../subscriptions/useOrganizationEntitlements'
 import { LoadingScreen } from '../../../shared/components/LoadingScreen'
 import { PlanRestrictionView } from '../../../shared/components/PlanRestrictionView'
 
@@ -10,7 +10,7 @@ export function PlanGuard({
   feature: string
   children: ReactNode
 }) {
-  const { isFeatureEnabled, planName, isLoading, error } = useStoreEntitlements()
+  const { isFeatureEnabled, planName, isLoading, error } = useOrganizationEntitlements()
 
   if (isLoading) return <LoadingScreen message="Comprobando suscripción..." />
 

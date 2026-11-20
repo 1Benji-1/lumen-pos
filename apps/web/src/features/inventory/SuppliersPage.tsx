@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import {
   useSuppliers,
   useCreateSupplier,
@@ -13,7 +13,7 @@ import { StickyTableWrapper } from '../../shared/components/StickyTableWrapper'
 import type { Supplier } from '@lumen-pos/types'
 
 export function SuppliersPage() {
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { data: suppliers, isLoading } = useSuppliers(storeId)
   const createSupplier = useCreateSupplier(storeId)

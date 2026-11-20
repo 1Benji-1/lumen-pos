@@ -1,32 +1,31 @@
-import { useStoreId } from './useStoreId'
-import { useStorePlan } from './useStorePlan'
-import { useStoreSettings } from '../../features/settings/hooks/useStoreSettings'
-import { useStoreEntitlements } from './useStoreEntitlements'
-import { usePrimaryBranch } from './usePrimaryBranch'
-import { useModuleActivations } from './useModuleActivations'
+import { useOrganizationId } from '../organizations/useOrganizationId'
+import { useOrganizationPlan } from '../subscriptions/useOrganizationPlan'
+import { useOrganizationSettings } from '../configuration/useOrganizationSettings'
+import { useOrganizationEntitlements } from '../subscriptions/useOrganizationEntitlements'
+import { usePrimaryBranch } from './legacy/usePrimaryBranch'
+import { useModuleActivations } from './legacy/useModuleActivations'
 import {
   MODULE_REGISTRY,
   resolveModuleAccess,
   resolveStoredBusinessProfile,
   resolveStoredModuleActivation,
-  type BusinessType,
   type ModuleDefinition,
   type ModuleId,
 } from '@lumen-pos/types'
 
-export function useStoreModules() {
-  const { storeId, loading: storeIdLoading, error: storeIdError } = useStoreId()
-  const { data: store, isLoading: storeLoading, error: storeError } = useStorePlan(storeId)
-  const { settings } = useStoreSettings(storeId)
-  const { entitlements, planName, isLoading: entitlementsLoading, error: entitlementsError } = useStoreEntitlements()
-  const { data: branch, isLoading: branchLoading, error: branchError } = usePrimaryBranch(storeId)
+export function useOrganizationModules() {
+  const { organizationId, loading: organizationIdLoading, error: organizationIdError } = useOrganizationId()
+  const { data: organization, isLoading: planLoading, error: planError } = useOrganizationPlan(organizationId)
+  const { settings } = useOrganizationSettings(organizationId)
+  const { entitlements, planName, isLoading: entitlementsLoading, error: entitlementsError } = useOrganizationEntitlements()
+  const { data: branch, isLoading: branchLoading, error: branchError } = usePrimaryBranch(organizationId)
   const branchId = branch?.id ?? null
-  const { data: activationRows, isLoading: activationLoading, error: activationError } = useModuleActivations(storeId, branchId)
+  const { data: activationRows, isLoading: activationLoading, error: activationError } = useModuleActivations(organizationId, branchId)
   const profile = resolveStoredBusinessProfile(branch?.category_id)
-  const isLoading = storeIdLoading || storeLoading || entitlementsLoading || branchLoading || activationLoading
-  const rawError = storeIdError || storeError || entitlementsError || branchError || activationError
+  const isLoading = organizationIdLoading || planLoading || entitlementsLoading || branchLoading || activationLoading
+  const rawError = organizationIdError || planError || entitlementsError || branchError || activationError
   const error = rawError instanceof Error ? rawError : rawError ? new Error(String(rawError))
-    : !isLoading && !storeId ? new Error('No se encontró la tienda del usuario.')
+    : !isLoading && !organizationId ? new Error('No se encontró la organización del usuario.')
     : !isLoading && !profile ? new Error('No se pudo comprobar la sucursal principal.')
     : !isLoading && !activationRows ? new Error('No se pudieron comprobar las activaciones de módulos.')
     : null
@@ -35,7 +34,6 @@ export function useStoreModules() {
     ? resolveStoredModuleActivation(activationRows.map(row => ({ moduleId: row.module_id, branchId: row.branch_id, enabled: row.enabled })), branchId)
     : {}
 
-  const businessType: BusinessType = store?.business_type ?? 'tienda_articulos'
   function getModuleAccess(moduleId: ModuleId) {
     if (accessUnavailable || !profile) {
       return { allowed: false, reason: 'access_unavailable' as const, module: MODULE_REGISTRY[moduleId] }
@@ -49,13 +47,12 @@ export function useStoreModules() {
   }
 
   // Priorizar el nombre comercial configurado por el usuario en Ajustes sobre el nombre técnico inicial
-  const effectiveStoreName = settings?.commercial_name?.trim() || store?.name || ''
+  const effectiveOrganizationName = settings?.commercial_name?.trim() || organization?.name || ''
 
   return {
-    storeId,
+    organizationId,
     branchId,
-    storeName: effectiveStoreName,
-    businessType,
+    organizationName: effectiveOrganizationName,
     profile,
     planName,
     availableModules,

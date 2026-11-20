@@ -3,7 +3,7 @@ import { useProducts } from '../../inventory/hooks/useProducts'
 import { useCategories } from '../../inventory/hooks/useCategories'
 import type { CartLine } from '../hooks/useCart'
 import { PRODUCT_UNITS } from '@lumen-pos/types'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 export function ProductGrid({
   storeId,
@@ -14,7 +14,7 @@ export function ProductGrid({
 }) {
   const { data: products, isLoading: productsLoading } = useProducts(storeId, { includeInactive: false })
   const { data: categories } = useCategories(storeId)
-  const { settings } = useStoreSettings(storeId)
+  const { settings } = useOrganizationSettings(storeId)
   const currency = settings?.currency_symbol || 'Bs'
 
   const [searchQuery, setSearchQuery] = useState('')

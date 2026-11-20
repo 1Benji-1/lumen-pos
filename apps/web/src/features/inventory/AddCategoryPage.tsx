@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import { CategoryForm } from './components/CategoryForm'
 import { InventoryDrawer } from './components/InventoryDrawer'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 
 export function AddCategoryPage() {
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   if (loading) return <LoadingScreen message="Cargando formulario de categoría..." />

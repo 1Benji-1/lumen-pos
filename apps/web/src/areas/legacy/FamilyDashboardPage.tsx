@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, getDefaultModuleIds, MODULE_REGISTRY, type BusinessProfile, type ModuleId } from '@lumen-pos/types'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
-import { useStoreModules } from '../../shared/hooks/useStoreModules'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
 import { getLowStockAlerts, getTodaySalesSummary } from './services/dashboardService'
 
 type ActionModule = keyof typeof permissions
@@ -49,7 +49,7 @@ function primaryActionName(moduleId: ModuleId) {
 }
 
 export function FamilyDashboardPage({ profile }: { profile: BusinessProfile }) {
-  const { storeId, storeName, canAccessModule } = useStoreModules()
+  const { organizationId: storeId, organizationName: storeName, canAccessModule } = useOrganizationModules()
   const { hasPermission } = useCurrentUserRole()
   const canOpen = (id: keyof typeof permissions) => canAccessModule(id) && hasPermission(permissions[id])
   const pos = canOpen('pos')

@@ -2,24 +2,24 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { ROLE_DEFINITIONS, type UserRole } from '@lumen-pos/types'
-import { useStoreId } from '../../shared/hooks/useStoreId'
-import { useStoreModules } from '../../shared/hooks/useStoreModules'
-import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
-import { useAuth } from '../../features/auth/hooks/useAuth'
-import { signOut } from '../../features/auth/services/authService'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
+import { useOrganizationEntitlements } from '../../core/subscriptions/useOrganizationEntitlements'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
+import { useAuth } from '../../core/auth/hooks/useAuth'
+import { signOut } from '../../core/auth/services/authService'
 import { useOnlineStatus } from '../../features/pos/hooks/useOnlineStatus'
 import { useOpenCashRegister } from '../../features/pos/hooks/useCashRegister'
 import { useAutoSyncOffline } from '../../features/pos/hooks/useAutoSyncOffline'
 import { supabase } from '../../shared/lib/supabaseClient'
-import { FeedbackPopover } from '../../shared/components/FeedbackPopover'
+import { FeedbackPopover } from './FeedbackPopover'
 
 export function NavigationHeader() {
-  const { storeId } = useStoreId()
-  const { storeName, planName } = useStoreModules()
+  const { organizationId: storeId } = useOrganizationId()
+  const { organizationName: storeName, planName } = useOrganizationModules()
   const { role, fullName, email } = useCurrentUserRole()
   const { session } = useAuth()
-  const { isFeatureEnabled } = useStoreEntitlements()
+  const { isFeatureEnabled } = useOrganizationEntitlements()
   const isOnline = useOnlineStatus()
   const navigate = useNavigate()
   const location = useLocation()
@@ -187,14 +187,14 @@ export function NavigationHeader() {
       {/* Línea divisoria vertical sutil entre logo y nombre */}
       <div className="h-5 w-[1px] bg-[#CFDBD5] shrink-0" aria-hidden="true" />
 
-      {/* Nombre completo de la tienda destacado en cápsula de superficie blanca y badge de plan contratado */}
+      {/* Nombre de la organización y plan contratado */}
       <div className="pl-3.5 pr-2 flex items-center gap-2.5 min-w-0">
         <div className="px-2.5 py-1 rounded-lg bg-white border border-[#CFDBD5] shadow-2xs flex items-center min-w-0">
           <span
             className="text-sm sm:text-base font-bold text-[#242423] tracking-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-[280px] select-text"
-            title={storeName || 'Mi comercio'}
+            title={storeName || 'Mi organización'}
           >
-            {storeName || 'Cargando comercio...'}
+            {storeName || 'Cargando organización...'}
           </span>
         </div>
         {planName && (

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '../../features/auth/hooks/useAuth'
-import { useStoreId } from '../../shared/hooks/useStoreId'
-import { useStorePlan } from '../../shared/hooks/useStorePlan'
+import { useAuth } from '../../core/auth/hooks/useAuth'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationPlan } from '../../core/subscriptions/useOrganizationPlan'
+import { useOrganizationSubscription } from '../../core/subscriptions/useOrganizationSubscription'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 import { supabase } from '../../shared/lib/supabaseClient'
 import {
@@ -13,48 +13,35 @@ import {
 
 export function ProtectedRoute() {
   const { isAuthenticated, loading: authLoading } = useAuth()
-  const { storeId, loading: storeIdLoading, error: profileError, retry: retryProfile } = useStoreId()
-  const { data: storePlan, isLoading: planLoading, isError: planError, refetch: retryPlan } = useStorePlan(storeId)
+  const { organizationId, loading: organizationIdLoading, error: profileError, retry: retryProfile } = useOrganizationId()
+  const { data: organizationPlan, isLoading: planLoading, isError: planError, refetch: retryPlan } = useOrganizationPlan(organizationId)
 
-  const { data: storeSubscription, isLoading: subLoading, isError: subError, refetch: retrySubscription } = useQuery({
-    queryKey: ['storeSubscriptionStatus', storeId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('stores')
-        .select('subscription_ends_at, grace_period_days')
-        .eq('id', storeId!)
-        .single()
-      if (error) throw error
-      if (!data) throw new Error('No se pudo verificar la suscripción.')
-      return data
-    },
-    enabled: !!storeId,
-  })
+  const { data: organizationSubscription, isLoading: subLoading, isError: subError, refetch: retrySubscription } = useOrganizationSubscription(organizationId)
 
-  const offlineSalesCount = useOfflineSalesCount(storeId)
+  const offlineSalesCount = useOfflineSalesCount(organizationId)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncFeedback, setSyncFeedback] = useState<{ message: string; isError?: boolean } | null>(null)
 
   const stillResolving =
     authLoading ||
-    storeIdLoading ||
-    (isAuthenticated && !!storeId && (planLoading || subLoading))
+    organizationIdLoading ||
+    (isAuthenticated && !!organizationId && (planLoading || subLoading))
 
   if (stillResolving) {
-    return <LoadingScreen fullScreen message="Verificando acceso a tu tienda..." />
+    return <LoadingScreen fullScreen message="Verificando acceso a tu organización..." />
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
 
-  if (profileError || !storeId || planError || subError || !storePlan || !storeSubscription) {
+  if (profileError || !organizationId || planError || subError || !organizationPlan || !organizationSubscription) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#E8EDDF] text-[#242423] text-center p-6">
         <div role="alert" className="max-w-md w-full bg-white border border-[#CFDBD5] rounded-xl p-8 shadow-sm">
           <p className="font-bold text-lg mb-2">No se pudo verificar el acceso</p>
-          <p className="text-[#5A5D5A] text-sm mb-6">{profileError?.message || 'No se pudo consultar el perfil o la suscripción de tu tienda. Intenta nuevamente.'}</p>
-          <button type="button" onClick={() => { retryProfile(); if (storeId) { void retryPlan(); void retrySubscription() } }} className="w-full px-4 py-2.5 rounded-lg bg-[#242423] text-white text-xs font-semibold cursor-pointer">Reintentar</button>
+          <p className="text-[#5A5D5A] text-sm mb-6">{profileError?.message || 'No se pudo consultar el perfil o la suscripción de tu organización. Intenta nuevamente.'}</p>
+          <button type="button" onClick={() => { retryProfile(); if (organizationId) { void retryPlan(); void retrySubscription() } }} className="w-full px-4 py-2.5 rounded-lg bg-[#242423] text-white text-xs font-semibold cursor-pointer">Reintentar</button>
           <button type="button" onClick={async () => { await supabase.auth.signOut(); window.location.assign('/login') }} className="w-full mt-3 text-sm cursor-pointer">Iniciar con otra cuenta</button>
         </div>
       </div>
@@ -62,12 +49,10 @@ export function ProtectedRoute() {
   }
 
   const now = new Date()
-  const status = storePlan?.subscription_status
-  const trialEndsAt = storePlan?.trial_ends_at ? new Date(storePlan.trial_ends_at) : null
-  const subEndsAt = storeSubscription?.subscription_ends_at
-    ? new Date(storeSubscription.subscription_ends_at)
-    : null
-  const graceDays = storeSubscription?.grace_period_days ?? 5
+  const status = organizationPlan.subscriptionStatus
+  const trialEndsAt = organizationPlan.trialEndsAt ? new Date(organizationPlan.trialEndsAt) : null
+  const subEndsAt = organizationSubscription.endsAt ? new Date(organizationSubscription.endsAt) : null
+  const graceDays = organizationSubscription.graceDays ?? 5
 
   let hasAccess: boolean
   let isPastDueGrace = false
@@ -95,11 +80,11 @@ export function ProtectedRoute() {
   }
 
   const handleSyncOffline = async () => {
-    if (!storeId) return
+    if (!organizationId) return
     setIsSyncing(true)
     setSyncFeedback(null)
     try {
-      const result = await syncOfflineSales(storeId)
+      const result = await syncOfflineSales(organizationId)
       if (result.syncedCount > 0) {
         setSyncFeedback({
           message: `Sincronización exitosa: ${result.syncedCount} venta(s) guardadas en la nube.`,
@@ -132,7 +117,7 @@ export function ProtectedRoute() {
           <p className="font-bold text-lg mb-2 text-[#242423]">Acceso suspendido</p>
           <p className="text-[#5A5D5A] text-xs sm:text-sm leading-relaxed mb-6">
             {status === 'trialing'
-              ? 'El período de prueba gratuita de la tienda ha finalizado.'
+              ? 'El período de prueba gratuita de la organización ha finalizado.'
               : 'La suscripción no se encuentra activa en este momento.'}{' '}
             Comuníquese con su coordinador o soporte técnico para reactivar el servicio.
           </p>

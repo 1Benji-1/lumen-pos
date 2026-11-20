@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import type { CartLine } from '../hooks/useCart'
 import type { PaymentMethod, PaymentSplitItem } from '@lumen-pos/types'
 import { useSendDigitalReceipt } from '../hooks/useSales'
-import { useRetailSubrubro } from '../../../shared/hooks/useRetailSubrubro'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
+import { useRetailSubrubro } from '../../retail/useRetailSubrubro'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
+import { useCurrentUserRole } from '../../../core/users/useCurrentUserRole'
 
 export function TicketModal({
   saleId,
@@ -36,7 +36,7 @@ export function TicketModal({
   onPrint: () => void
 }) {
   const { config } = useRetailSubrubro()
-  const { settings } = useStoreSettings(storeId)
+  const { settings } = useOrganizationSettings(storeId)
   const currency = settings?.currency_symbol || 'Bs'
   const displayName = settings?.commercial_name || storeName || 'LUMEN POS'
   const ticketFooter = settings?.ticket_footer || config.defaultTicketPolicy || '¡Gracias por su compra!'

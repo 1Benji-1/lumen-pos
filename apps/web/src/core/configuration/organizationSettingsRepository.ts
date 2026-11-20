@@ -1,11 +1,11 @@
-import { supabase } from '../../../shared/lib/supabaseClient'
+import { supabase } from '../../shared/lib/supabaseClient'
 import type { StoreSettings, UpdateStoreSettingsInput } from '@lumen-pos/types'
 
-export async function getStoreSettings(storeId: string): Promise<StoreSettings> {
+export async function getOrganizationSettings(organizationId: string): Promise<StoreSettings> {
   const { data, error } = await supabase
     .from('store_settings')
     .select('*')
-    .eq('store_id', storeId)
+    .eq('store_id', organizationId)
     .single()
 
   if (error) {
@@ -13,7 +13,7 @@ export async function getStoreSettings(storeId: string): Promise<StoreSettings> 
     if (error.code === 'PGRST116') {
       const { data: created, error: insertError } = await supabase
         .from('store_settings')
-        .insert({ store_id: storeId })
+        .insert({ store_id: organizationId })
         .select('*')
         .single()
 
@@ -26,8 +26,8 @@ export async function getStoreSettings(storeId: string): Promise<StoreSettings> 
   return data as unknown as StoreSettings
 }
 
-export async function updateStoreSettings(
-  storeId: string,
+export async function updateOrganizationSettings(
+  organizationId: string,
   input: UpdateStoreSettingsInput
 ): Promise<StoreSettings> {
   const { data, error } = await supabase
@@ -36,7 +36,7 @@ export async function updateStoreSettings(
       ...input,
       updated_at: new Date().toISOString(),
     })
-    .eq('store_id', storeId)
+    .eq('store_id', organizationId)
     .select('*')
     .single()
 
@@ -50,7 +50,7 @@ export async function updateStoreSettings(
         await supabase
           .from('stores')
           .update({ name: trimmed })
-          .eq('id', storeId)
+          .eq('id', organizationId)
       } catch {
         // En caso de que las políticas RLS restrinjan la modificación directa de stores
       }

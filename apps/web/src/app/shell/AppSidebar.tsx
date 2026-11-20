@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
-import { useStoreModules } from '../../shared/hooks/useStoreModules'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
 import { type Permission, type ModuleId } from '@lumen-pos/types'
 
 // Íconos coherentes con trazo uniforme (strokeWidth 1.8)
@@ -182,7 +182,7 @@ const SIDEBAR_BLOCKS: SidebarItemDef[][] = [
 
 export function AppSidebar() {
   const { hasPermission, loading: roleLoading } = useCurrentUserRole()
-  const { canAccessModule, isLoading: modulesLoading, error } = useStoreModules()
+  const { canAccessModule, isLoading: modulesLoading, error } = useOrganizationModules()
 
   const isItemVisible = (item: SidebarItemDef) => {
     if (roleLoading || modulesLoading || error) return false
@@ -191,7 +191,7 @@ export function AppSidebar() {
     return true
   }
 
-  // Filtrar bloques según los permisos del usuario y módulos habilitados en la tienda
+  // Filtrar bloques según el acceso de la organización y los permisos del usuario.
   const visibleBlocks = SIDEBAR_BLOCKS.map((block) =>
     block.filter(isItemVisible)
   ).filter((block) => block.length > 0)

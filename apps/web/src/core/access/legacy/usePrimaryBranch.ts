@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../../../shared/lib/supabaseClient'
 
-export function usePrimaryBranch(storeId: string | null) {
+export function usePrimaryBranch(organizationId: string | null) {
   return useQuery({
-    queryKey: ['primaryBranch', storeId],
+    queryKey: ['primaryBranch', organizationId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('branches')
         .select('id, store_id, name, category_id, is_primary')
-        .eq('store_id', storeId!)
+        .eq('store_id', organizationId!)
         .eq('is_primary', true)
         .single()
       if (error) throw error
       return data
     },
-    enabled: !!storeId,
+    enabled: !!organizationId,
   })
 }

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
 import { useStaff } from '../staff/hooks/useStaff'
 import { useStockMovements } from './hooks/useStockMovements'
 import { getDateRangeForPeriod } from '../analytics/utils/dateRanges'
@@ -134,7 +134,7 @@ function getTypeLabel(type: string): string {
 }
 
 export function StockMovementsPage() {
-  const { storeId, loading: storeLoading } = useStoreId()
+  const { organizationId: storeId, loading: storeLoading } = useOrganizationId()
   const { hasPermission } = useCurrentUserRole()
   const canManageInventory = hasPermission('inventory:manage')
 

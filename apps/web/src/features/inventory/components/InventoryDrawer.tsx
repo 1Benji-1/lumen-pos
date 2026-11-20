@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { useStoreEntitlements } from '../../../shared/hooks/useStoreEntitlements'
+import { useOrganizationEntitlements } from '../../../core/subscriptions/useOrganizationEntitlements'
 
 interface InventoryDrawerProps {
   isOpen: boolean
@@ -8,7 +8,7 @@ interface InventoryDrawerProps {
 }
 
 export function InventoryDrawer({ isOpen, onClose }: InventoryDrawerProps) {
-  const { isFeatureEnabled } = useStoreEntitlements()
+  const { isFeatureEnabled } = useOrganizationEntitlements()
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

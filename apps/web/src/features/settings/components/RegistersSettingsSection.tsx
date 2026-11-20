@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface RegistersSettingsSectionProps {
   settings?: StoreSettings
 }
 
 export function RegistersSettingsSection({ settings }: RegistersSettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [defaultOpeningCash, setDefaultOpeningCash] = useState<number | ''>(0)
   const [maxCashRegisterHours, setMaxCashRegisterHours] = useState<number | ''>(12)

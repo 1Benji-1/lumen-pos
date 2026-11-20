@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useStoreId } from '../../shared/hooks/useStoreId'
-import { useStorePlan } from '../../shared/hooks/useStorePlan'
-import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
-import { useCurrentUserRole } from '../../shared/hooks/useCurrentUserRole'
-import { useStoreModules } from '../../shared/hooks/useStoreModules'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationPlan } from '../../core/subscriptions/useOrganizationPlan'
+import { useOrganizationEntitlements } from '../../core/subscriptions/useOrganizationEntitlements'
+import { useCurrentUserRole } from '../../core/users/useCurrentUserRole'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
 import { useStaff } from './hooks/useStaff'
 import { StaffTable } from './components/StaffTable'
 import { AddStaffModal } from './components/AddStaffModal'
@@ -12,8 +12,8 @@ import { RoleMatrixModal } from './components/RoleMatrixModal'
 import { MedicalSpecialtiesSection } from './components/MedicalSpecialtiesSection'
 
 export function StaffPage() {
-  const { profile } = useStoreModules()
-  const { storeId } = useStoreId()
+  const { profile } = useOrganizationModules()
+  const { organizationId: storeId } = useOrganizationId()
   const { isOwner, hasPermission, email: currentUserEmail } = useCurrentUserRole()
   const {
     data: staff = [],
@@ -23,8 +23,8 @@ export function StaffPage() {
     refetch,
     isRefetching,
   } = useStaff(storeId)
-  const { data: storePlan } = useStorePlan(storeId)
-  const { getLimit } = useStoreEntitlements()
+  const { data: storePlan } = useOrganizationPlan(storeId)
+  const { getLimit } = useOrganizationEntitlements()
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false)
@@ -33,8 +33,8 @@ export function StaffPage() {
   const currentUserId = staff.find((s) => s.email === currentUserEmail)?.id
 
   // Límites según el plan contratado
-  const planCode = (storePlan?.plans as any)?.code
-  const planName = (storePlan?.plans as any)?.name || (planCode === 'standard' ? 'Standard' : planCode === 'pro' ? 'Pro' : 'Actual')
+  const planCode = (storePlan?.plan as any)?.code
+  const planName = (storePlan?.plan as any)?.name || (planCode === 'standard' ? 'Standard' : planCode === 'pro' ? 'Pro' : 'Actual')
   const maxUsers = getLimit('max_users') ?? (planCode === 'standard' ? 2 : planCode === 'pro' ? 6 : 999)
   const isUserLimitReached = staff.length >= maxUsers
 

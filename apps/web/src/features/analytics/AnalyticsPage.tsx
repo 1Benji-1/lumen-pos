@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
-import { useStorePlan } from '../../shared/hooks/useStorePlan'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
+import { useOrganizationPlan } from '../../core/subscriptions/useOrganizationPlan'
 import { useAnalytics } from './hooks/useAnalytics'
 import { useCashAuditAnalytics } from './hooks/useCashAuditAnalytics'
 import { getDateRangeForPeriod } from './utils/dateRanges'
@@ -15,8 +15,8 @@ import type { AnalyticsPeriod } from '@lumen-pos/types'
 type AnalyticsTab = 'commercial' | 'cash_audit'
 
 export function AnalyticsPage() {
-  const { storeId, loading: storeLoading } = useStoreId()
-  const { data: storePlan } = useStorePlan(storeId)
+  const { organizationId: storeId, loading: storeLoading } = useOrganizationId()
+  const { data: storePlan } = useOrganizationPlan(storeId)
 
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('commercial')
   const [period, setPeriod] = useState<AnalyticsPeriod>('30days')

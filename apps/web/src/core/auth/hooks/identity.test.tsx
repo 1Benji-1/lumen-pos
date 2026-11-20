@@ -4,26 +4,32 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const f = vi.hoisted(() => ({ auth: { session: { user: { id: 'a' } }, loading: false }, requests: [] as ((result: { data: Record<string, unknown> | null; error: { message: string } | null }) => void)[] }))
 vi.mock('./useAuth', () => ({ useAuth: () => f.auth }))
 vi.mock('../../../shared/lib/supabaseClient', () => ({ supabase: { from: () => ({ select: () => ({ eq: () => ({ single: () => new Promise(resolve => f.requests.push(resolve)) }) }) }) } }))
-import { useStoreId } from '../../../shared/hooks/useStoreId'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
+import { useOrganizationId } from '../../organizations/useOrganizationId'
+import { useCurrentUserRole } from '../../users/useCurrentUserRole'
 
 afterEach(cleanup)
 beforeEach(() => { f.auth = { session: { user: { id: 'a' } }, loading: false }; f.requests = [] })
 
 describe('identity profile resolution', () => {
+  it('reports an active profile without an organization as a recoverable error', async () => {
+    const { result } = renderHook(() => useOrganizationId())
+    await act(async () => { f.requests[0]({ data: { store_id: null, is_active: true }, error: null }) })
+    expect(result.current.organizationId).toBeNull()
+    expect(result.current.error?.message).toMatch(/organización/i)
+  })
   it('reports a missing store profile as an explicit recoverable error', async () => {
-    const { result } = renderHook(() => useStoreId())
+    const { result } = renderHook(() => useOrganizationId())
     await act(async () => { f.requests[0]({ data: null, error: { message: 'missing profile' } }) })
     expect(result.current.loading).toBe(false)
     expect(result.current.error).toBeTruthy()
-    expect(result.current.storeId).toBe(null)
+    expect(result.current.organizationId).toBe(null)
   })
   it('ignores stale profile responses from a previous account', async () => {
-    const { result, rerender } = renderHook(() => useStoreId())
+    const { result, rerender } = renderHook(() => useOrganizationId())
     f.auth = { session: { user: { id: 'b' } }, loading: false }; rerender()
     await act(async () => { f.requests[1]({ data: { store_id: 'store-b', is_active: true }, error: null }) })
     await act(async () => { f.requests[0]({ data: { store_id: 'store-a', is_active: true }, error: null }) })
-    expect(result.current.storeId).toBe('store-b')
+    expect(result.current.organizationId).toBe('store-b')
   })
   it('clears role privileges immediately when the account changes', async () => {
     const { result, rerender } = renderHook(() => useCurrentUserRole())

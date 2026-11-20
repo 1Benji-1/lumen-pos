@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { StoreSettings } from '@lumen-pos/types'
-import { useUpdateStoreSettings } from '../hooks/useStoreSettings'
+import { useUpdateOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 interface PosSettingsSectionProps {
   settings?: StoreSettings
 }
 
 export function PosSettingsSection({ settings }: PosSettingsSectionProps) {
-  const updateSettings = useUpdateStoreSettings()
+  const updateSettings = useUpdateOrganizationSettings()
 
   const [allowNegativeStock, setAllowNegativeStock] = useState(false)
   const [requireCustomerForSale, setRequireCustomerForSale] = useState(false)

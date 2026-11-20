@@ -4,7 +4,7 @@ import { useCreateProduct } from '../hooks/useProducts'
 import { useSuppliers } from '../hooks/useSuppliers'
 import { PRODUCT_UNITS, type ProductUnit } from '@lumen-pos/types'
 import { generateInternalBarcode } from '../utils/barcodeGenerator'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
 
 export function VariantForm({
   storeId,
@@ -17,7 +17,7 @@ export function VariantForm({
 }) {
   const { data: categories } = useCategories(storeId)
   const { data: suppliers } = useSuppliers(storeId)
-  const { settings } = useStoreSettings(storeId)
+  const { settings } = useOrganizationSettings(storeId)
   const createProduct = useCreateProduct(storeId)
 
   const defaultUnit = (settings?.default_product_unit as ProductUnit) || 'unit'

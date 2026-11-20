@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import { useProducts, useBatchUpdatePrices } from './hooks/useProducts'
 import { useCategories } from './hooks/useCategories'
 import { InventoryDrawer } from './components/InventoryDrawer'
@@ -12,7 +12,7 @@ type OperationType = 'percentage_increase' | 'percentage_decrease' | 'fixed_incr
 type RoundingOption = 'none' | 'integer' | 'half'
 
 export function BatchPriceAdjustPage() {
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { data: products, isLoading, refetch } = useProducts(storeId, { includeInactive: false })
   const { data: categories } = useCategories(storeId)

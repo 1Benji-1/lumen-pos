@@ -5,8 +5,8 @@ import { CashMovementModal } from './CashMovementModal'
 import { CorteXModal } from './CorteXModal'
 import { CloseRegisterModal } from './CloseRegisterModal'
 import type { CashMovementType } from '@lumen-pos/types'
-import { useStoreSettings } from '../../settings/hooks/useStoreSettings'
-import { useCurrentUserRole } from '../../../shared/hooks/useCurrentUserRole'
+import { useOrganizationSettings } from '../../../core/configuration/useOrganizationSettings'
+import { useCurrentUserRole } from '../../../core/users/useCurrentUserRole'
 
 export function OpenRegisterForm({
   storeId,
@@ -18,7 +18,7 @@ export function OpenRegisterForm({
   allowsMultipleRegisters?: boolean
 }) {
   const { hasPermission, loading: roleLoading } = useCurrentUserRole()
-  const { settings } = useStoreSettings(storeId)
+  const { settings } = useOrganizationSettings(storeId)
   const openRegister = useOpenRegisterMutation(storeId)
   const [amount, setAmount] = useState('')
   const [error, setError] = useState<string | null>(null)

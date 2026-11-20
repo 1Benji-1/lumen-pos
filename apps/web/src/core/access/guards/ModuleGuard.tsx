@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { type ModuleId } from '@lumen-pos/types'
-import { useStoreModules } from '../../../shared/hooks/useStoreModules'
+import { useOrganizationModules } from '../useOrganizationModules'
 import { LoadingScreen } from '../../../shared/components/LoadingScreen'
 import { PlanRestrictionView } from '../../../shared/components/PlanRestrictionView'
 
@@ -15,7 +15,7 @@ export function ModuleGuard({
     isLoading,
     error,
     getModuleAccess,
-  } = useStoreModules()
+  } = useOrganizationModules()
 
   if (isLoading) {
     return <LoadingScreen message="Comprobando permisos de módulo..." />

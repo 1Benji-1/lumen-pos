@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react'
-import { useStoreId } from '../../shared/hooks/useStoreId'
+import { useOrganizationId } from '../../core/organizations/useOrganizationId'
 import { useProducts, useAdjustVariantStock } from './hooks/useProducts'
 import { InventoryDrawer } from './components/InventoryDrawer'
 import { InventoryNavTabs } from './components/InventoryNavTabs'
 import { LoadingScreen } from '../../shared/components/LoadingScreen'
 import { StickyTableWrapper } from '../../shared/components/StickyTableWrapper'
-import { useStoreSettings } from '../settings/hooks/useStoreSettings'
-import { useStorePlan } from '../../shared/hooks/useStorePlan'
-import { useStoreEntitlements } from '../../shared/hooks/useStoreEntitlements'
+import { useOrganizationSettings } from '../../core/configuration/useOrganizationSettings'
+import { useOrganizationPlan } from '../../core/subscriptions/useOrganizationPlan'
+import { useOrganizationEntitlements } from '../../core/subscriptions/useOrganizationEntitlements'
 
 interface CountItem {
   variantId: string
@@ -21,16 +21,16 @@ interface CountItem {
 }
 
 export function PhysicalCountPage() {
-  const { storeId, loading } = useStoreId()
+  const { organizationId: storeId, loading } = useOrganizationId()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { data: products, isLoading, refetch } = useProducts(storeId, { includeInactive: false })
-  const { settings } = useStoreSettings(storeId)
-  const { data: planData } = useStorePlan(storeId)
-  const { isFeatureEnabled } = useStoreEntitlements()
+  const { settings } = useOrganizationSettings(storeId)
+  const { data: planData } = useOrganizationPlan(storeId)
+  const { isFeatureEnabled } = useOrganizationEntitlements()
   const adjustStock = useAdjustVariantStock(storeId)
 
   // El conteo a ciegas aplica si está habilitado en ajustes y el plan es Enterprise o tiene override
-  const planCode = (planData?.plans as any)?.code
+  const planCode = (planData?.plan as any)?.code
   const hasBlindCountPlan = planCode === 'enterprise' || isFeatureEnabled('physical_count_blind')
   const isBlindCount = hasBlindCountPlan && (settings?.blind_physical_count === true)
 
