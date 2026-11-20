@@ -5,15 +5,27 @@ export function StockAlertBadge({
   quantity: number
   threshold: number
 }) {
-  if (quantity <= 0) {
+  if (quantity < 0) {
     return (
-      <span className="text-xs px-2 py-1 rounded bg-red-600 text-white">Sin stock</span>
+      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold bg-[#FDF0ED] text-[#BC4749] border border-[#F0B2B4]">
+        Negativo ({quantity})
+      </span>
+    )
+  }
+
+  if (quantity === 0) {
+    return (
+      <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full font-semibold bg-[#FDF0ED] text-[#BC4749] border border-[#F0B2B4]">
+        Agotado
+      </span>
     )
   }
 
   if (quantity <= threshold) {
     return (
-      <span className="text-xs px-2 py-1 rounded bg-yellow-500 text-black">Stock bajo</span>
+      <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium bg-[#FEF9E7] text-[#8A6D14] border border-[#F5CB5C]">
+        Stock bajo
+      </span>
     )
   }
 

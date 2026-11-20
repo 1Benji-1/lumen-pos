@@ -1,13 +1,30 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
-import type { ReactNode } from 'react'
-
-const queryClient = new QueryClient()
+import { useEffect, useState, type ReactNode } from 'react'
+import { supabase } from '../../shared/lib/supabaseClient'
+import { ToastProvider } from '../../shared/context/ToastContext'
+import { ThemeProvider } from '../../shared/context/ThemeContext'
 
 export function AppProviders({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient())
+  useEffect(() => {
+    let accountId: string | null = null
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextAccountId = session?.user.id ?? null
+      if (nextAccountId !== accountId) {
+        accountId = nextAccountId
+        queryClient.clear()
+      }
+    })
+    return () => { data.subscription.unsubscribe(); queryClient.clear() }
+  }, [queryClient])
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>{children}</BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <ToastProvider>{children}</ToastProvider>
+        </BrowserRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

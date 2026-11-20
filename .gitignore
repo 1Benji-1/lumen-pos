@@ -8,3 +8,34 @@ dist
 .vercel
 apps/mobile/build
 apps/mobile/.dart_tool
+
+# Estado local y paquetes duplicados de asistentes de desarrollo.
+# Se conservan en cada equipo, pero no forman parte del producto.
+/.agent/
+/.agents/
+/.claude/
+/.codex/
+/.cursor/
+/.dsh/
+/.gemini/
+/.grok/
+/.hermes/
+/.impeccable/
+/.kiro/
+/.opencode/
+/.pi/
+/.qoder/
+/.rovodev/
+/.trae-cn/
+/.trae/
+/.veto/
+/.vibe/
+/apps/web/.impeccable/
+/.github/agents/
+/.github/hooks/
+/.github/skills/
+/README.txt
+
+# Estado de ejecución local, nunca fuente del esquema.
+/packages/supabase/.temp/
+/.superpowers/
