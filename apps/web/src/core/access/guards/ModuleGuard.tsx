@@ -26,7 +26,7 @@ export function ModuleGuard({
   }
   const access = getModuleAccess(module)
 
-  if (access.reason === 'category_disabled' || access.reason === 'organization_disabled') {
+  if (access.reason === 'area_disabled' || access.reason === 'category_disabled' || access.reason === 'organization_disabled') {
     return (
       <PlanRestrictionView
         title="Módulo no está activo"

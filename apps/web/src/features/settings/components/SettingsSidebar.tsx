@@ -1,3 +1,5 @@
+import type { ModuleId } from '@lumen-pos/types'
+
 export type SettingsSectionId =
   | 'general'
   | 'tickets'
@@ -12,31 +14,31 @@ export type SettingsSectionId =
 
 export interface SettingsGroup {
   group: string
-  items: { id: SettingsSectionId; label: string }[]
+  items: { id: SettingsSectionId; label: string; moduleId?: ModuleId }[]
 }
 
 export const SETTINGS_GROUPS: SettingsGroup[] = [
   {
-    group: 'Negocio',
+    group: 'Organización',
     items: [
       { id: 'general', label: 'General' },
-      { id: 'tickets', label: 'Comprobantes' },
+      { id: 'tickets', label: 'Comprobantes', moduleId: 'pos' },
       { id: 'regional', label: 'Moneda y Horarios' },
     ],
   },
   {
     group: 'Ventas y Caja',
     items: [
-      { id: 'pos', label: 'Punto de Venta' },
-      { id: 'registers', label: 'Gaveta y Turnos' },
+      { id: 'pos', label: 'Punto de Venta', moduleId: 'pos' },
+      { id: 'registers', label: 'Gaveta y Turnos', moduleId: 'pos' },
     ],
   },
   {
     group: 'Inventario',
     items: [
-      { id: 'inventory_stock', label: 'Existencias y Alertas' },
-      { id: 'inventory_labels', label: 'Etiquetas y Códigos' },
-      { id: 'inventory_audit', label: 'Auditoría y Compras' },
+      { id: 'inventory_stock', label: 'Existencias y Alertas', moduleId: 'inventory' },
+      { id: 'inventory_labels', label: 'Etiquetas y Códigos', moduleId: 'inventory' },
+      { id: 'inventory_audit', label: 'Auditoría y Compras', moduleId: 'inventory' },
     ],
   },
   {
@@ -51,11 +53,13 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
 interface SettingsSidebarProps {
   activeSection: SettingsSectionId
   onSelectSection: (section: SettingsSectionId) => void
+  groups?: SettingsGroup[]
 }
 
 export function SettingsSidebar({
   activeSection,
   onSelectSection,
+  groups = SETTINGS_GROUPS,
 }: SettingsSidebarProps) {
   return (
     <aside
@@ -71,7 +75,7 @@ export function SettingsSidebar({
 
       {/* Navegación por grupos temáticos con fondo idéntico al sidebar principal */}
       <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
-        {SETTINGS_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.group}>
             <span className="px-3 pb-1.5 text-[10px] font-bold text-[#5A5D5A] tracking-wider uppercase block">
               {group.group}

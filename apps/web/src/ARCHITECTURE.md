@@ -20,6 +20,6 @@ shared → utilidades externas y tipos
 
 El núcleo de Web agrupa sesión, usuarios y roles, organización, suscripción, configuración y acceso. `useOrganizationId` identifica la organización de la cuenta autenticada. Los hooks de suscripción y el repositorio de configuración traducen desde las tablas actuales de Supabase. Los identificadores y filtros SQL conservan el formato usado por los datos existentes.
 
-El acceso de Web todavía resuelve el perfil de negocio y las activaciones con la sucursal primaria. Las lecturas correspondientes están en `core/access/legacy`. La transición hacia acceso por áreas pertenece a la fase 3.
+Web obtiene el área y el catálogo inicial de la organización mediante `get_organization_area_context()`. Supabase usa el mismo catálogo para evaluar el acceso. Las activaciones históricas conservan su ámbito actual y se consultan desde `core/access/legacy`. Los perfiles anteriores con un catálogo distinto conservan ese catálogo durante la transición.
 
-`areas/legacy` conserva el dashboard de varias familias y sus dependencias de ventas e inventario. Los preajustes de subrubro siguen en `features/retail`.
+`app/router/OrganizationHome.tsx` selecciona Inicio de Comercio, Gastronomía, Salud o compatibilidad. El panel completo de Comercio sigue reutilizando el dashboard existente. Los preajustes de subrubro siguen en `features/retail`.

@@ -42,12 +42,12 @@ select test.rejects('owner cannot update a branch directly',
   $$update public.branches set name='Forged' where store_id='20000000-0000-0000-0000-000000000001'$$);
 select test.rejects('owner cannot delete a branch directly',
   $$delete from public.branches where store_id='20000000-0000-0000-0000-000000000001'$$);
+reset role;
 update public.stores set name='A renewed',business_type='tienda_articulos',industry_sub_type='ferreteria_construccion'
 where id='20000000-0000-0000-0000-000000000001';
-select test.ok('owner legacy edits synchronize the primary branch',
+select test.ok('privileged legacy edits synchronize the primary branch',
   exists(select 1 from public.branches where store_id='20000000-0000-0000-0000-000000000001'
     and is_primary and name='A renewed' and category_id='ferreteria_construccion'));
-reset role;
 update public.branches set category_id='barberia_belleza' where store_id='20000000-0000-0000-0000-000000000001' and is_primary;
 set role authenticated;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',false);

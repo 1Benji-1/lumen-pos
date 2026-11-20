@@ -4,13 +4,13 @@ import { useOrganizationPlan } from '../../../core/subscriptions/useOrganization
 import { useOrganizationEntitlements } from '../../../core/subscriptions/useOrganizationEntitlements'
 import { useOrganizationModules } from '../../../core/access/useOrganizationModules'
 import { useStaff } from '../../staff/hooks/useStaff'
-import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, PLAN_DEFAULT_LIMITS, SYSTEM_FEATURES, type PlanCode } from '@lumen-pos/types'
+import { AREA_NAMES, PLAN_DEFAULT_LIMITS, SYSTEM_FEATURES, type PlanCode } from '@lumen-pos/types'
 
 export function PlanLimitsSection() {
   const { organizationId: storeId } = useOrganizationId()
   const { data: storePlan, isLoading: planLoading } = useOrganizationPlan(storeId)
   const { isFeatureEnabled, getLimit } = useOrganizationEntitlements()
-  const { profile, isLoading: modulesLoading } = useOrganizationModules()
+  const { areaId, compatibilityMode, isLoading: modulesLoading, canAccessModule } = useOrganizationModules()
   const { data: staff, isLoading: staffLoading } = useStaff(storeId)
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
@@ -31,7 +31,16 @@ export function PlanLimitsSection() {
   const maxRegisters = getLimit('max_cash_registers') ?? limits.max_cash_registers
   const currentRegisters = 1 // Caja actual
 
-  const activeFeaturesList = SYSTEM_FEATURES.filter((f) => isFeatureEnabled(f.key))
+  const hasSales = canAccessModule('pos')
+  const hasInventory = canAccessModule('inventory')
+  const categories = {
+    pos: hasSales,
+    inventario: hasInventory,
+    reportes: canAccessModule('analytics'),
+    general: true,
+  }
+  const activeFeaturesList = SYSTEM_FEATURES.filter((feature) => categories[feature.category] && isFeatureEnabled(feature.key))
+  const areaName = areaId ? AREA_NAMES[areaId] : compatibilityMode ? 'Perfil anterior' : null
 
   const handleOpenUpgrade = (targetPlan: PlanCode) => {
     setSelectedUpgradePlan(targetPlan)
@@ -94,22 +103,20 @@ export function PlanLimitsSection() {
             </div>
           </div>
 
-          {/* Especialidad comercial */}
+          {/* Área de la organización */}
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="max-w-md">
               <span className="text-xs font-semibold text-[#242423] block">
-                Familia y categoría comercial
+                Área de la organización
               </span>
               <span className="text-xs text-[#5A5D5A] block mt-0.5">
-                Perfil de la sucursal principal que define sus módulos iniciales.
+                El área define las herramientas iniciales de la organización.
               </span>
             </div>
             <div className="w-full sm:w-80 shrink-0 flex sm:justify-end">
-              {profile ? <span className="text-xs font-semibold text-[#242423] bg-[#E8EDDF] px-2.5 py-1 rounded border border-[#CFDBD5] flex flex-wrap gap-1">
-                <span>{BUSINESS_FAMILIES[profile.familyId].name}</span>
-                <span aria-hidden="true">·</span>
-                <span>{BUSINESS_CATEGORIES[profile.categoryId].name}</span>
-              </span> : <span className="text-xs text-[#BC4749]">Perfil no disponible</span>}
+              {areaName ? <span className="text-xs font-semibold text-[#242423] bg-[#E8EDDF] px-2.5 py-1 rounded border border-[#CFDBD5]">
+                {areaName}
+              </span> : <span className="text-xs text-[#BC4749]">Área no disponible</span>}
             </div>
           </div>
         </div>
@@ -153,14 +160,13 @@ export function PlanLimitsSection() {
             </div>
           </div>
 
-          {/* Límite de cajas registradoras */}
-          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {hasSales && <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="max-w-md">
               <span className="text-xs font-semibold text-[#242423] block">
                 Cajas registradoras simultáneas
               </span>
               <span className="text-xs text-[#5A5D5A] block mt-0.5">
-                Puntos de cobro en paralelo permitidos para esta sucursal.
+                Puntos de cobro en paralelo que permite el plan.
               </span>
             </div>
             <div className="w-full sm:w-80 shrink-0 flex items-center justify-between sm:justify-end gap-3 font-mono text-xs">
@@ -171,13 +177,13 @@ export function PlanLimitsSection() {
                 {maxRegisters >= 999 ? '(Ilimitado)' : `(Máximo: ${maxRegisters})`}
               </span>
             </div>
-          </div>
+          </div>}
 
           {/* Módulos habilitados */}
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="max-w-md">
               <span className="text-xs font-semibold text-[#242423] block">
-                Módulos del sistema activos
+                Funciones disponibles del plan
               </span>
               <span className="text-xs text-[#5A5D5A] block mt-0.5">
                 Funcionalidades disponibles según el plan suscrito.
@@ -205,7 +211,7 @@ export function PlanLimitsSection() {
               Tu organización cuenta con el plan más completo de la plataforma
             </span>
             <span className="text-xs text-[#5A5D5A] block mt-0.5">
-              Tienes acceso total a todas las herramientas avanzadas, colaboradores ilimitados y puntos de cobro sin restricciones.
+              Tienes los límites más altos para las herramientas disponibles en tu área.
             </span>
           </div>
           <span className="shrink-0 text-xs font-bold text-[#588157] bg-white px-3 py-1.5 rounded border border-[#588157]/40 shadow-2xs self-start sm:self-auto">
@@ -224,7 +230,7 @@ export function PlanLimitsSection() {
                 <div>
                   <span className="text-xs font-bold text-[#242423] block">Plan Pro</span>
                   <span className="text-xs text-[#5A5D5A] block mt-0.5">
-                    Hasta 6 colaboradores, 3 cajas simultáneas, órdenes de compra y control de vencimientos.
+                    Hasta 6 colaboradores{hasSales ? ', 3 cajas simultáneas' : ''}{hasInventory ? ', órdenes de compra y control de vencimientos' : ''}.
                   </span>
                 </div>
                 <div className="shrink-0 flex items-center justify-end">
@@ -243,7 +249,7 @@ export function PlanLimitsSection() {
               <div>
                 <span className="text-xs font-bold text-[#242423] block">Plan Empresa</span>
                 <span className="text-xs text-[#5A5D5A] block mt-0.5">
-                  Usuarios ilimitados, cajas ilimitadas, auditoría a ciegas, ajuste masivo y soporte prioritario.
+                  El mayor límite de usuarios{hasSales ? ' y cajas' : ''}{hasInventory ? ', auditoría a ciegas y ajuste masivo de inventario' : ''}.
                 </span>
               </div>
               <div className="shrink-0 flex items-center justify-end">

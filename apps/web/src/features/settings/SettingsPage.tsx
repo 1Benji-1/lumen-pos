@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { SettingsSidebar, type SettingsSectionId } from './components/SettingsSidebar'
+import { SETTINGS_GROUPS, SettingsSidebar, type SettingsSectionId } from './components/SettingsSidebar'
+import { useOrganizationModules } from '../../core/access/useOrganizationModules'
 import { useOrganizationSettings } from '../../core/configuration/useOrganizationSettings'
 import { GeneralSettingsSection } from './components/GeneralSettingsSection'
 import { TicketSettingsSection } from './components/TicketSettingsSection'
@@ -15,7 +16,7 @@ import { ModuleSettingsSection } from './components/ModuleSettingsSection'
 const SECTION_HEADERS: Record<SettingsSectionId, { title: string; subtitle: string }> = {
   general: {
     title: 'Ajustes Generales',
-    subtitle: 'Identidad del negocio, datos fiscales y contacto de la sucursal.',
+    subtitle: 'Identidad, datos fiscales y contacto de la organización.',
   },
   tickets: {
     title: 'Comprobantes y Recibos',
@@ -51,13 +52,20 @@ const SECTION_HEADERS: Record<SettingsSectionId, { title: string; subtitle: stri
   },
   modules: {
     title: 'Módulos de la organización',
-    subtitle: 'Categoría, disponibilidad y activación de herramientas para la sucursal principal.',
+    subtitle: 'Área, disponibilidad y activación de herramientas de la organización.',
   },
 }
 
 export function SettingsPage() {
-  const [activeSection, setActiveSection] = useState<SettingsSectionId>('general')
+  const [selectedSection, setSelectedSection] = useState<SettingsSectionId>('general')
   const { settings, isLoading } = useOrganizationSettings()
+  const { canAccessModule } = useOrganizationModules()
+  const groups = SETTINGS_GROUPS.map(group => ({
+    ...group,
+    items: group.items.filter(item => !item.moduleId || canAccessModule(item.moduleId)),
+  })).filter(group => group.items.length > 0)
+  const activeSection = groups.some(group => group.items.some(item => item.id === selectedSection))
+    ? selectedSection : 'general'
 
   const currentHeader = SECTION_HEADERS[activeSection]
 
@@ -66,7 +74,8 @@ export function SettingsPage() {
       {/* 1. Sub-sidebar lateral estático continuo 100% viewport */}
       <SettingsSidebar
         activeSection={activeSection}
-        onSelectSection={setActiveSection}
+        onSelectSection={setSelectedSection}
+        groups={groups}
       />
 
       {/* 2. Área principal de contenido */}

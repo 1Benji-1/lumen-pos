@@ -10,9 +10,10 @@ import { StaffTable } from './components/StaffTable'
 import { AddStaffModal } from './components/AddStaffModal'
 import { RoleMatrixModal } from './components/RoleMatrixModal'
 import { MedicalSpecialtiesSection } from './components/MedicalSpecialtiesSection'
+import { getAssignableStaffRoles } from './assignableStaffRoles'
 
 export function StaffPage() {
-  const { profile } = useOrganizationModules()
+  const { areaId, compatibilityMode } = useOrganizationModules()
   const { organizationId: storeId } = useOrganizationId()
   const { isOwner, hasPermission, email: currentUserEmail } = useCurrentUserRole()
   const {
@@ -30,6 +31,7 @@ export function StaffPage() {
   const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false)
 
   const canManageStaff = hasPermission('staff:manage')
+  const assignableRoles = getAssignableStaffRoles(isOwner, areaId, compatibilityMode)
   const currentUserId = staff.find((s) => s.email === currentUserEmail)?.id
 
   // Límites según el plan contratado
@@ -55,7 +57,7 @@ export function StaffPage() {
         <div>
           <h1 className="text-2xl font-bold text-[#242423] tracking-tight">Equipo de trabajo</h1>
           <p className="text-xs text-[#5A5D5A] mt-1">
-            Gestión de colaboradores, asignación de roles y control de accesos del comercio.
+            Gestiona colaboradores, roles y permisos de tu organización.
           </p>
         </div>
 
@@ -70,7 +72,7 @@ export function StaffPage() {
             <span>Ver matriz de permisos</span>
           </button>
 
-          {canManageStaff && (
+          {canManageStaff && assignableRoles.length > 0 && (
             isUserLimitReached ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-[#8A6D14] font-semibold px-2.5 py-1 bg-[#FEF9E7] border border-[#F5CB5C]/60 rounded-lg">
@@ -281,10 +283,11 @@ export function StaffPage() {
           currentUserId={currentUserId}
           isOwner={isOwner}
           canManage={canManageStaff}
+          assignableRoles={assignableRoles}
         />
       )}
 
-      {profile?.categoryId === 'consultorios_clinicas' && storeId && !isError && (
+      {areaId === 'health' && storeId && !isError && (
         <MedicalSpecialtiesSection storeId={storeId} staff={staff} isOwner={isOwner} />
       )}
 
@@ -293,7 +296,7 @@ export function StaffPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         storeId={storeId}
-        isOwner={isOwner}
+        availableRoles={assignableRoles}
       />
 
       <RoleMatrixModal

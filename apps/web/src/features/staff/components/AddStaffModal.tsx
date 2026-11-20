@@ -10,26 +10,23 @@ interface AddStaffModalProps {
   isOpen: boolean
   onClose: () => void
   storeId: string | null
-  isOwner: boolean
+  availableRoles: readonly UserRole[]
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export function AddStaffModal({ isOpen, onClose, storeId, isOwner }: AddStaffModalProps) {
+export function AddStaffModal({ isOpen, onClose, storeId, availableRoles }: AddStaffModalProps) {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState<UserRole>('cashier')
+  const [chosenRole, setChosenRole] = useState<UserRole | null>(null)
   const [setDirectPassword, setSetDirectPassword] = useState(false)
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const createStaffMutation = useCreateStaff(storeId)
 
-  if (!isOpen) return null
-
-  const availableRoles: UserRole[] = isOwner
-    ? ['cashier', 'stock_clerk', 'admin', 'owner']
-    : ['cashier', 'stock_clerk']
+  if (!isOpen || availableRoles.length === 0) return null
+  const role = chosenRole && availableRoles.includes(chosenRole) ? chosenRole : availableRoles[0]
 
   const selectedRoleDef = ROLE_DEFINITIONS[role]
 
@@ -71,7 +68,7 @@ export function AddStaffModal({ isOpen, onClose, storeId, isOwner }: AddStaffMod
   function handleClose() {
     setFullName('')
     setEmail('')
-    setRole('cashier')
+    setChosenRole(null)
     setSetDirectPassword(false)
     setPassword('')
     setErrorMessage(null)
@@ -87,7 +84,7 @@ export function AddStaffModal({ isOpen, onClose, storeId, isOwner }: AddStaffMod
               Nuevo colaborador
             </h2>
             <p className="text-xs text-[#5A5D5A] mt-0.5">
-              Asigna el rol y credenciales de acceso para el personal de la tienda.
+              Asigna el rol y credenciales de acceso para el equipo.
             </p>
           </div>
           <button
@@ -151,7 +148,7 @@ export function AddStaffModal({ isOpen, onClose, storeId, isOwner }: AddStaffMod
             </label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
+              onChange={(e) => setChosenRole(e.target.value as UserRole)}
               className="w-full h-11 px-3 py-2.5 bg-white border border-[#CFDBD5] rounded-lg text-xs text-[#242423] focus:outline-none focus:border-[#242423] transition cursor-pointer"
             >
               {availableRoles.map((r) => (

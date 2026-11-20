@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { StaffMember } from '@lumen-pos/types'
+import type { StaffMember, UserRole } from '@lumen-pos/types'
 import { RoleBadge } from './RoleBadge'
 import { EditRoleModal } from './EditRoleModal'
 import { DeleteStaffModal } from './DeleteStaffModal'
@@ -13,6 +13,7 @@ interface StaffTableProps {
   currentUserId?: string
   isOwner: boolean
   canManage: boolean
+  assignableRoles: readonly UserRole[]
 }
 
 export function StaffTable({
@@ -21,6 +22,7 @@ export function StaffTable({
   currentUserId,
   isOwner,
   canManage,
+  assignableRoles,
 }: StaffTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
@@ -190,7 +192,7 @@ export function StaffTable({
               filteredStaff.map((member) => {
                 const isSelf = member.id === currentUserId
                 const isMemberOwner = member.role === 'owner'
-                const canEditThisMember = canManage && (!isMemberOwner || isOwner)
+                const canEditThisMember = canManage && assignableRoles.length > 0 && (!isMemberOwner || isOwner)
 
                 return (
                   <tr key={member.id} className="hover:bg-[#FAFBF9] transition">
@@ -280,7 +282,7 @@ export function StaffTable({
         onClose={() => setEditingMember(null)}
         member={editingMember}
         storeId={storeId}
-        isOwner={isOwner}
+        availableRoles={assignableRoles}
       />
 
       {/* Modal formal para confirmar desvinculación con validación de turno activo */}

@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { BUSINESS_CATEGORIES, BUSINESS_FAMILIES, getDefaultModuleIds, MODULE_REGISTRY, type ModuleId } from '@lumen-pos/types'
+import { AREA_NAMES, MODULE_REGISTRY, type ModuleId } from '@lumen-pos/types'
 import { useCurrentUserRole } from '../../../core/users/useCurrentUserRole'
 import { useModuleActivations } from '../../../core/access/legacy/useModuleActivations'
 import { useOrganizationModules } from '../../../core/access/useOrganizationModules'
 import { supabase } from '../../../shared/lib/supabaseClient'
 
 export function ModuleSettingsSection() {
-  const { organizationId: storeId, branchId, profile, isLoading, error, getModuleAccess } = useOrganizationModules()
+  const { organizationId: storeId, branchId, areaId, compatibilityMode, defaultModuleIds, isLoading, error, getModuleAccess } = useOrganizationModules()
   const { data: rows } = useModuleActivations(storeId, branchId)
   const { isOwner } = useCurrentUserRole()
   const queryClient = useQueryClient()
@@ -17,10 +17,12 @@ export function ModuleSettingsSection() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   if (isLoading) return <p className="text-sm text-[#5A5D5A]">Cargando módulos de la organización...</p>
-  if (error || !storeId || !branchId || !profile || !rows) return <p role="alert" className="text-sm text-[#BC4749]">No se pudieron cargar los módulos. Revisa la conexión e inténtalo de nuevo.</p>
+  if (error || !storeId || !branchId || (!areaId && !compatibilityMode) || !rows) return <p role="alert" className="text-sm text-[#BC4749]">No se pudieron cargar los módulos. Revisa la conexión e inténtalo de nuevo.</p>
 
-  const defaults = getDefaultModuleIds(profile.categoryId)
-  const available = Object.values(MODULE_REGISTRY).filter(module => module.implementationStatus === 'available')
+  const defaults = defaultModuleIds
+  const available = Object.values(MODULE_REGISTRY).filter(module =>
+    module.implementationStatus === 'available' && (compatibilityMode || defaults.includes(module.id)),
+  )
   const planned = defaults.map(id => MODULE_REGISTRY[id]).filter(module => module.implementationStatus === 'planned')
 
   async function changeActivation(moduleId: ModuleId, value: string) {
@@ -47,9 +49,11 @@ export function ModuleSettingsSection() {
 
   return <div className="space-y-6">
     <div className="rounded-xl bg-white border border-[#CFDBD5] p-5 space-y-2">
-      <h2 className="text-base font-semibold text-[#242423]">Perfil de la sucursal principal</h2>
-      <p className="text-sm text-[#5A5D5A]">{BUSINESS_FAMILIES[profile.familyId].name} · {BUSINESS_CATEGORIES[profile.categoryId].name}</p>
-      <p className="text-xs text-[#5A5D5A]">La categoría define los módulos iniciales. El plan y las activaciones determinan el acceso final.</p>
+      <h2 className="text-base font-semibold text-[#242423]">Área de la organización</h2>
+      <p className="text-sm text-[#5A5D5A]">{areaId ? AREA_NAMES[areaId] : 'Perfil anterior'}</p>
+      <p className="text-xs text-[#5A5D5A]">{compatibilityMode
+        ? 'Se conservan los módulos iniciales y las activaciones de la configuración anterior.'
+        : 'El área define los módulos iniciales. El plan y las activaciones determinan su disponibilidad.'}</p>
     </div>
     {message && <p role="status" className="text-sm text-[#3B6B3A]">{message}</p>}
     {saveError && <p role="alert" className="text-sm text-[#BC4749]">No se pudo guardar: {saveError}</p>}
@@ -63,16 +67,15 @@ export function ModuleSettingsSection() {
         const value = draft[module.id] ?? (row ? String(row.enabled) : 'default')
         const status = access.reason === 'plan_disabled' ? 'Excluido por el plan'
           : access.reason === 'organization_disabled' ? 'Desactivado'
-          : access.reason === 'category_disabled' ? 'No incluido en la categoría'
+          : access.reason === 'area_disabled' ? 'Fuera del catálogo inicial'
           : access.allowed ? 'Activo' : 'No disponible'
         return <div key={module.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold text-[#242423]">{module.name}</span>
-              <span className="text-[11px] text-[#5A5D5A] bg-[#E8EDDF] px-2 py-0.5 rounded-full">{module.scope === 'branch' ? 'Sucursal' : 'Organización'}</span>
             </div>
             <p className="text-xs text-[#5A5D5A] mt-1">{module.description}</p>
-            <p className="text-xs font-medium text-[#242423] mt-1">{status}{defaults.includes(module.id) ? ' · Recomendado para esta categoría' : ''}</p>
+            <p className="text-xs font-medium text-[#242423] mt-1">{status}{defaults.includes(module.id) ? ' · Catálogo inicial' : ''}</p>
           </div>
           {isOwner && !protectedModule ? <select
             aria-label={`Activación de ${module.name}`}
@@ -81,7 +84,7 @@ export function ModuleSettingsSection() {
             onChange={event => void changeActivation(module.id, event.target.value)}
             className="w-full sm:w-56 min-h-11 px-3 py-2 bg-white border border-[#CFDBD5] rounded-lg text-sm text-[#242423] focus:outline-none focus:ring-2 focus:ring-[#F5CB5C] disabled:opacity-60"
           >
-            <option value="default">Usar valor de categoría</option>
+            <option value="default">Usar valor inicial</option>
             <option value="true" disabled={access.reason === 'plan_disabled'}>Activar</option>
             <option value="false">Desactivar</option>
           </select> : <span className="text-xs text-[#5A5D5A]">{protectedModule ? 'Acceso básico' : status}</span>}
@@ -89,7 +92,7 @@ export function ModuleSettingsSection() {
       })}
     </div>
     {planned.length > 0 && <div className="rounded-xl bg-white border border-[#CFDBD5] p-5">
-      <h2 className="text-sm font-semibold text-[#242423]">Módulos planificados para esta categoría</h2>
+      <h2 className="text-sm font-semibold text-[#242423]">Módulos en preparación</h2>
       <p className="text-xs text-[#5A5D5A] mt-1">Todavía no se pueden activar ni utilizar.</p>
       <div className="flex flex-wrap gap-2 mt-3">{planned.map(module => <span key={module.id} className="text-xs px-2.5 py-1 rounded-full bg-[#E8EDDF] text-[#5A5D5A]">{module.name}</span>)}</div>
     </div>}

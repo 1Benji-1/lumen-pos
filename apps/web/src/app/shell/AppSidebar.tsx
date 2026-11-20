@@ -182,7 +182,7 @@ const SIDEBAR_BLOCKS: SidebarItemDef[][] = [
 
 export function AppSidebar() {
   const { hasPermission, loading: roleLoading } = useCurrentUserRole()
-  const { canAccessModule, isLoading: modulesLoading, error } = useOrganizationModules()
+  const { areaId, canAccessModule, isLoading: modulesLoading, error } = useOrganizationModules()
 
   const isItemVisible = (item: SidebarItemDef) => {
     if (roleLoading || modulesLoading || error) return false
@@ -218,6 +218,9 @@ export function AppSidebar() {
 
               {block.map((item) => {
                 const Icon = item.icon
+                const label = item.id === 'pos' && areaId === 'health' ? 'Punto de venta anterior'
+                  : item.id === 'pos' && areaId === 'gastronomy' ? 'Ventas'
+                  : item.label
 
                 return (
                   <NavLink
@@ -231,8 +234,8 @@ export function AppSidebar() {
                           : 'text-[#5A5D5A] hover:text-[#242423] hover:bg-[#E5E5E5]/70'
                       }`
                     }
-                    title={item.label}
-                    aria-label={item.label}
+                    title={label}
+                    aria-label={label}
                   >
                     {({ isActive }) => (
                       <>
@@ -249,7 +252,7 @@ export function AppSidebar() {
 
                         {/* Etiqueta / Texto visible únicamente al expandir por hover */}
                         <span className="text-xs text-[#242423] whitespace-nowrap overflow-hidden opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 delay-75 pl-3 pr-2 font-medium">
-                          {item.label}
+                          {label}
                         </span>
                       </>
                     )}

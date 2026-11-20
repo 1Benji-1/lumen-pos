@@ -1309,6 +1309,16 @@ export type Database = {
       }
     }
     Functions: {
+      get_organization_area_context: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          store_id: string
+          branch_id: string
+          area_id: string | null
+          default_module_ids: string[]
+          compatibility_mode: boolean
+        }[]
+      }
       set_medical_specialties: {
         Args: { p_user_id: string; p_specialties: string[] }
         Returns: undefined

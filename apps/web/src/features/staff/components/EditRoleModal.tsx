@@ -12,7 +12,7 @@ interface EditRoleModalProps {
   onClose: () => void
   member: StaffMember | null
   storeId: string | null
-  isOwner: boolean
+  availableRoles: readonly UserRole[]
 }
 
 export function EditRoleModal({
@@ -20,7 +20,7 @@ export function EditRoleModal({
   onClose,
   member,
   storeId,
-  isOwner,
+  availableRoles,
 }: EditRoleModalProps) {
   const [selectedRole, setSelectedRole] = useState<UserRole>('cashier')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -33,13 +33,9 @@ export function EditRoleModal({
     }
   }, [member])
 
-  if (!isOpen || !member) return null
-
-  const availableRoles: UserRole[] = isOwner
-    ? ['cashier', 'stock_clerk', 'admin', 'owner']
-    : ['cashier', 'stock_clerk']
-
-  const selectedRoleDef = ROLE_DEFINITIONS[selectedRole]
+  if (!isOpen || !member || availableRoles.length === 0) return null
+  const role = availableRoles.includes(selectedRole) ? selectedRole : availableRoles[0]
+  const selectedRoleDef = ROLE_DEFINITIONS[role]
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,7 +46,7 @@ export function EditRoleModal({
     try {
       await updateRoleMutation.mutateAsync({
         userId: member.id,
-        role: selectedRole,
+        role,
       })
       onClose()
     } catch (err: any) {
@@ -94,7 +90,7 @@ export function EditRoleModal({
               Seleccionar nuevo rol
             </label>
             <select
-              value={selectedRole}
+              value={role}
               onChange={(e) => setSelectedRole(e.target.value as UserRole)}
               className="w-full h-11 px-3 py-2.5 bg-white border border-[#CFDBD5] rounded-lg text-xs text-[#242423] focus:outline-none focus:border-[#242423] transition cursor-pointer"
             >

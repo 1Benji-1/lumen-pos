@@ -5,16 +5,22 @@ import { ModuleSettingsSection } from './ModuleSettingsSection'
 
 const fixture = vi.hoisted(() => ({
   role: 'owner',
+  areaId: 'commerce',
+  defaults: ['dashboard', 'inventory', 'analytics', 'settings'],
   error: null as Error | null,
   rows: [] as { module_id: string; branch_id: string | null; enabled: boolean }[] | undefined,
   rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
 }))
 vi.mock('../../../core/users/useCurrentUserRole', () => ({ useCurrentUserRole: () => ({ role: fixture.role, isOwner: fixture.role === 'owner' }) }))
-vi.mock('../../../core/access/useOrganizationModules', () => ({ useOrganizationModules: () => ({ organizationId: 'store-a', branchId: 'branch-a', profile: { familyId: 'retail', categoryId: 'comercio_general' }, isLoading: false, error: fixture.error, getModuleAccess: (id: string) => ({ allowed: id !== 'analytics', reason: id === 'analytics' ? 'plan_disabled' : 'allowed' }) }) }))
+vi.mock('../../../core/access/useOrganizationModules', () => ({ useOrganizationModules: () => ({ organizationId: 'store-a', branchId: 'branch-a', areaId: fixture.areaId, compatibilityMode: false, defaultModuleIds: fixture.defaults, isLoading: false, error: fixture.error, getModuleAccess: (id: string) => ({ allowed: id !== 'analytics', reason: id === 'analytics' ? 'plan_disabled' : 'allowed' }) }) }))
 vi.mock('../../../core/access/legacy/useModuleActivations', () => ({ useModuleActivations: () => ({ data: fixture.rows, isLoading: false, error: null }) }))
 vi.mock('../../../shared/lib/supabaseClient', () => ({ supabase: { rpc: fixture.rpc } }))
 
-beforeEach(() => { fixture.role = 'owner'; fixture.error = null; fixture.rows = []; fixture.rpc.mockReset().mockResolvedValue({ data: null, error: null }) })
+beforeEach(() => {
+  fixture.role = 'owner'; fixture.error = null; fixture.rows = []
+  fixture.areaId = 'commerce'; fixture.defaults = ['dashboard', 'inventory', 'analytics', 'settings']
+  fixture.rpc.mockReset().mockResolvedValue({ data: null, error: null })
+})
 afterEach(cleanup)
 
 it('lets the owner disable a module and confirms the saved change', async () => {
@@ -29,6 +35,16 @@ it('shows status without activation controls to a staff administrator', () => {
   render(<QueryClientProvider client={new QueryClient()}><ModuleSettingsSection /></QueryClientProvider>)
   expect(screen.getByText('Inventario')).toBeTruthy()
   expect(screen.queryByLabelText('Activación de Inventario')).toBeNull()
+})
+
+it('shows the Salud catalog without activation controls for Caja or Agenda', () => {
+  fixture.areaId = 'health'
+  fixture.defaults = ['dashboard', 'staff', 'settings', 'agenda']
+  render(<QueryClientProvider client={new QueryClient()}><ModuleSettingsSection /></QueryClientProvider>)
+  expect(screen.getByText('Salud')).toBeTruthy()
+  expect(screen.getByText('Agenda')).toBeTruthy()
+  expect(screen.queryByLabelText('Activación de Agenda')).toBeNull()
+  expect(screen.queryByLabelText('Activación de Punto de venta')).toBeNull()
 })
 
 it('shows a recoverable error when module data cannot be checked', () => {

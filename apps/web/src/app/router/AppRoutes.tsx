@@ -7,7 +7,7 @@ import { PlanGuard } from '../../core/access/guards/PlanGuard'
 import { LoginForm } from '../../core/auth/components/LoginForm'
 import { ForgotPasswordForm } from '../../core/auth/components/ForgotPasswordForm'
 import { ResetPasswordForm } from '../../core/auth/components/ResetPasswordForm'
-import { DashboardPage } from '../../areas/legacy'
+import { OrganizationHome } from './OrganizationHome'
 import { InventoryPage } from '../../features/inventory/InventoryPage'
 import { AddProductPage } from '../../features/inventory/AddProductPage'
 import { AddCategoryPage } from '../../features/inventory/AddCategoryPage'
@@ -37,7 +37,7 @@ export function AppRoutes() {
             element={
               <ModuleGuard module="dashboard">
                 <RoleGuard requiredPermission="dashboard:view">
-                  <DashboardPage />
+                  <OrganizationHome />
                 </RoleGuard>
               </ModuleGuard>
             }
